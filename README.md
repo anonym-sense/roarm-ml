@@ -124,7 +124,9 @@ first time.
 ### Handing things over (camera)
 
 The Camera tab turns on the device's camera and shows it in a corner of the
-3D view with the tracked hand drawn over it. The hand is tracked in the
+3D view with the tracked hand drawn over it. Pick which camera from the
+list (an external webcam, or a phone's front or back camera); names appear
+once the browser has permission, and the choice is remembered. The hand is tracked in the
 browser (MediaPipe); the video never leaves the device, only the hand's
 estimated position is sent to the server. An orange dot in the 3D view shows
 where the arm thinks your hand is.

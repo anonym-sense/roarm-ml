@@ -55,16 +55,26 @@ export function locate(image, world, width, height) {
   };
 }
 
+/** Cameras the browser can see. Names are only filled in once camera permission is granted. */
+export async function cameras() {
+  const all = await navigator.mediaDevices.enumerateDevices();
+  return all.filter((d) => d.kind === "videoinput")
+    .map((d, i) => ({ id: d.deviceId, name: d.label || `Camera ${i + 1}` }));
+}
+
 export class HandCamera {
   constructor(video, overlay, onHand, onStatus) {
     Object.assign(this, { video, overlay, onHand, onStatus, stream: null, running: false });
   }
 
-  async start(facing = "user") {
+  /** deviceId: a camera from cameras(), or empty for the browser's default. */
+  async start(deviceId = "") {
     this.onStatus("Starting the camera…");
+    const which = deviceId ? { deviceId: { exact: deviceId } } : {};
     this.stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: facing, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false,
+      video: { ...which, width: { ideal: 640 }, height: { ideal: 480 } }, audio: false,
     });
+    this.deviceId = this.stream.getVideoTracks()[0].getSettings().deviceId || deviceId;
     this.video.srcObject = this.stream;
     await this.video.play();
     this.onStatus("Loading the hand tracker…");

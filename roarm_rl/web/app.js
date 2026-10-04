@@ -2,7 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
-import { HandCamera } from "/static/hand.js";
+import { HandCamera, cameras } from "/static/hand.js";
 
 const $ = (id) => document.getElementById(id);
 const post = (url, body) =>
@@ -345,8 +345,8 @@ const HANDOVER_TEXT = {
   give: { wait: "waiting for an open hand", approach: "bringing it to you", release: "letting go", retract: "backing away" },
   follow: { wait: "following your hand" },
 };
-let facing = "user";
 let lastHandSent = 0;
+const remembered = () => { try { return localStorage.getItem("roarm-camera") || ""; } catch (e) { return ""; } };
 
 const camera3 = new HandCamera($("cam-video"), $("cam-overlay"), (hand) => {
   $("cam-range").textContent = hand ? `${Math.round(hand.depth * 100)} cm away` : "no hand";
@@ -371,29 +371,44 @@ async function toggleCamera() {
   $("cam").hidden = false;
   $("cam-toggle").textContent = "Stop camera";
   try {
-    await camera3.start(facing);
+    try {
+      await camera3.start($("cam-device").value);
+    } catch (e) {
+      // the remembered camera is unplugged or busy: fall back to whatever the browser offers
+      if (!$("cam-device").value || e.name === "NotAllowedError") throw e;
+      camera3.stop();
+      $("cam-device").value = "";
+      await camera3.start("");
+    }
+    await listCameras();
   } catch (e) {
     camera3.stop();
     $("cam").hidden = true;
     $("cam-toggle").textContent = "Start camera";
     $("cam-status").textContent = e.name === "NotAllowedError" ? "Camera permission was refused."
+      : e.name === "NotReadableError" ? "That camera is in use by another app. Close it there, or pick another camera."
       : `Could not start the camera or the hand tracker (${e.message || e.name}).`;
   }
 }
 $("cam-toggle").onclick = toggleCamera;
 
-function facingButtons() {
-  $("seg-facing").replaceChildren(...[["user", "front"], ["environment", "back"]].map(([value, label]) => {
-    const b = el("button", { textContent: label, type: "button", className: facing === value ? "on" : "" });
-    b.onclick = async () => {
-      facing = value;
-      facingButtons();
-      if (camera3.stream) { camera3.stop(); await toggleCamera(); }
-    };
-    return b;
-  }));
+// The camera list. Browsers only reveal camera names after permission is granted,
+// so it is filled in properly once a camera has been started.
+async function listCameras() {
+  const list = await cameras();
+  const current = camera3.deviceId || $("cam-device").value || remembered();
+  $("cam-device").replaceChildren(el("option", { value: "", textContent: "Default camera" }),
+    ...list.filter((c) => c.id).map((c) => el("option", { value: c.id, textContent: c.name })));
+  if ([...$("cam-device").options].some((o) => o.value === current)) $("cam-device").value = current;
 }
-facingButtons();
+$("cam-device").onchange = async () => {
+  try { localStorage.setItem("roarm-camera", $("cam-device").value); } catch (e) { /* private mode */ }
+  if (camera3.stream) { camera3.stop(); await toggleCamera(); }
+};
+if (navigator.mediaDevices) {
+  listCameras();
+  navigator.mediaDevices.addEventListener?.("devicechange", listCameras); // a camera was plugged in
+}
 
 document.querySelectorAll("[data-handover]").forEach((b) => {
   b.onclick = () => post("/api/handover", { action: b.dataset.handover });
