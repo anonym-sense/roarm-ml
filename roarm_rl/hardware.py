@@ -66,6 +66,16 @@ class RoArmHardware:
             raise RoArmHardwareError("not connected")
         self._arm.joints_radian_ctrl(radians=list(radians), speed=self.speed, acc=self.acc)
 
+    def get_joint_positions(self):
+        """Measured [base, shoulder, elbow, gripper] radians, or None if the read failed.
+
+        Serial only: the arm sends no feedback over HTTP.
+        """
+        if not self.connected:
+            raise RoArmHardwareError("not connected")
+        value = self._arm.joints_radian_get()
+        return list(value) if isinstance(value, list) and len(value) == 4 else None
+
     def home(self):
         if not self.connected:
             raise RoArmHardwareError("not connected")

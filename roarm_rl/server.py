@@ -70,6 +70,8 @@ class Robot:
     def __init__(self, hardware=None):
         self.hardware = hardware
         self.mirroring = False
+        self.torque = True  # False: motors released, the view follows the real arm
+        self._torque_request = None
         self.player = GesturePlayer()
         self.brain = Brain()
         self.composer = Composer() if composer_available() else None
@@ -140,8 +142,16 @@ class Robot:
             self._goal = [float(v) for v in q[:4]]
 
     def set_mirror(self, on):
-        self.mirroring = bool(on) and self.hardware is not None and self.hardware.connected
+        self.mirroring = (bool(on) and self.torque
+                          and self.hardware is not None and self.hardware.connected)
         return self.mirroring
+
+    def set_torque(self, on):
+        """Hold (True) or release (False) the real arm's motors; applied on the simulator thread."""
+        if self.hardware is None or not self.hardware.connected:
+            return False
+        self._torque_request = bool(on)
+        return True
 
     # --- simulator thread ----------------------------------------------------------
 
@@ -164,6 +174,26 @@ class Robot:
                             for g in event.gestures:
                                 self.player.enqueue(g.label, g.keyframes)
                             self.post("arm", event.reply, event)
+                    if self._torque_request is not None:
+                        want, self._torque_request = self._torque_request, None
+                        try:
+                            self.hardware.set_torque(want)
+                            self.torque = want
+                            if not want:  # never command a limp arm
+                                self.mirroring = False
+                        except Exception as e:
+                            print(f"[hardware] torque change failed: {e}")
+                    if not self.torque:
+                        # Motors released: someone is moving the arm by hand. Show where it is.
+                        self.player.cancel()
+                        self._goal, self._home = None, False
+                        try:
+                            measured = self.hardware.get_joint_positions()
+                        except Exception as e:
+                            measured = None
+                            print(f"[hardware] read failed: {e}")
+                        if measured is not None:
+                            q = measured
                     if self._home:
                         self._home, self._goal = False, list(sim.home_radians)
                     pose = self.player.update(q)
@@ -182,7 +212,7 @@ class Robot:
                     poses.append([round(v, 5) for v in (*s[4], *s[5])])
                 self.state = {
                     "q": [round(v, 4) for v in q], "links": poses, "gesture": label,
-                    "inventing": inventing, "mirror": self.mirroring,
+                    "inventing": inventing, "mirror": self.mirroring, "torque": self.torque,
                     "hardware": self.hardware is not None and self.hardware.connected,
                 }
 
@@ -325,6 +355,10 @@ def create_app(robot, ears=None, access_code=None):
     @app.post("/api/mirror")
     def mirror(body: dict):
         return {"mirror": robot.set_mirror(body.get("on"))}
+
+    @app.post("/api/torque")
+    def torque(body: dict):
+        return {"ok": robot.set_torque(body.get("on"))}
 
     @app.post("/api/feedback")
     def feedback(body: dict):

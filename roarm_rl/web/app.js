@@ -144,11 +144,16 @@ function connect() {
     if (state.gesture) $("chip-gesture").textContent = state.gesture;
     $("chip-inventing").hidden = !state.inventing;
     $("chip-hw").hidden = !state.hardware;
-    $("mirror").disabled = !state.hardware;
+    $("mirror").disabled = !state.hardware || !state.torque;
     $("mirror").checked = !!state.mirror;
-    $("hw-hint").textContent = state.hardware
-      ? "The real arm is connected. Turn mirroring on to move it."
-      : "No real arm connected. Start the server with --hw serial --port COMx to mirror.";
+    $("torque").disabled = !state.hardware;
+    if ($("torque-confirm").hidden) $("torque").checked = !!state.torque;
+    $("chip-limp").hidden = !state.hardware || state.torque;
+    $("hw-hint").textContent = !state.hardware
+      ? "No real arm connected. Start the server with --hw serial to use these."
+      : !state.torque
+        ? "Motors released: move the arm by hand and the 3D view follows it. Turn the motors back on before mirroring."
+        : "The real arm is connected. Turn mirroring on to move it.";
     ears = state.ears;
     (state.messages || []).forEach(addMessage);
     if (!draggingSlider && state.q) state.q.forEach((v, i) => setSlider(i, v));
@@ -377,6 +382,13 @@ function setSlider(i, v) {
 }
 
 $("mirror").onchange = () => post("/api/mirror", { on: $("mirror").checked });
+// Releasing the motors lets the arm drop, so it takes a second, deliberate tap.
+$("torque").onchange = () => {
+  if ($("torque").checked) post("/api/torque", { on: true });
+  else $("torque-confirm").hidden = false;
+};
+$("torque-release").onclick = () => { $("torque-confirm").hidden = true; post("/api/torque", { on: false }); };
+$("torque-cancel").onclick = () => { $("torque-confirm").hidden = true; $("torque").checked = true; };
 
 // ---------------------------------------------------------------- tabs + start
 document.querySelectorAll(".tabs button").forEach((tab) => {

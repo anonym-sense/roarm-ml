@@ -88,6 +88,12 @@ USB port is found automatically, or pass `--port`) or `--hw http`, **and** the
 Mirror switch in the Control tab is on. Without `--hw` the page drives the
 simulation only.
 
+The Control tab also has a **Motors holding** switch. Turning it off (it asks
+you to confirm, because the arm goes limp and can fall) releases the motors
+so you can pose the arm by hand; the 3D view then follows the real arm.
+Mirroring is disabled until the motors are back on. This needs the serial
+connection, since the arm reports its position only over USB.
+
 Every open browser sees the same arm and the same conversation.
 
 The page records speech in the browser and the server transcribes it with

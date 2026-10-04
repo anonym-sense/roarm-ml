@@ -23,6 +23,7 @@
         <span class="chip" id="chip-gesture" hidden></span>
         <span class="chip warn" id="chip-inventing" hidden>inventing a gesture…</span>
         <span class="chip" id="chip-hw" hidden>real arm</span>
+        <span class="chip warn" id="chip-limp" hidden>motors released</span>
       </div>
     </header>
     <div class="stage-actions">
@@ -82,6 +83,12 @@
       <div class="pane" id="pane-control">
         <div id="sliders"></div>
         <label class="toggle"><input type="checkbox" id="mirror"><span></span>Mirror to the real arm</label>
+        <label class="toggle"><input type="checkbox" id="torque" checked><span></span>Motors holding (torque)</label>
+        <div class="confirm" id="torque-confirm" hidden>
+          <p>The arm will go limp and can fall. Hold it first.</p>
+          <button class="btn danger" id="torque-release" type="button">Release motors</button>
+          <button class="btn" id="torque-cancel" type="button">Cancel</button>
+        </div>
         <p class="hint" id="hw-hint"></p>
       </div>
     </div>

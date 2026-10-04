@@ -188,6 +188,10 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .toggle input:checked + span::after { left: 21px; }
 .toggle input:disabled + span { opacity: .4; }
 
+.confirm { border: 1px solid #ff6b6b55; background: #ff6b6b14; border-radius: 12px; padding: 10px 12px; margin-top: 10px; }
+.confirm p { margin: 0 0 9px; }
+.toggle + .toggle { margin-top: 14px; }
+
 /* ---- phone ---- */
 @media (max-width: 820px) {
   #app { grid-template-columns: 1fr; grid-template-rows: 42dvh minmax(0, 1fr); }
