@@ -17,8 +17,10 @@ P            toggle "Mirror to Real Robot"
 H            send HOME pose (sim + hardware if mirroring)
 T            toggle hardware torque
 ESC          quit
-Chat window: type what the arm should do ("nod twice then wave slowly").
-Grabbing the arm with the mouse, H, or typing "stop" cancels a gesture.
+Chat window: say or type what the arm should do ("nod twice then wave slowly").
+Grabbing the arm with the mouse, H, or saying/typing "stop" cancels a gesture.
+A phrase nothing matches is handed to roarm_rl.composer (when a designer
+command is configured), which invents a gesture for it and remembers it.
 Mouse: click+drag the arm itself to move the hand in 3D (switches to IK
 mode automatically). Drag happens in the plane facing the camera at the
 depth you grabbed -- orbit/zoom the camera first to reach a different
@@ -33,7 +35,8 @@ import time
 
 import pybullet as p
 
-from roarm_rl import intent
+from roarm_rl import intent, library
+from roarm_rl.composer import Composer, available as composer_available
 from roarm_rl.gesture import GesturePlayer
 from roarm_rl.sim import RoArmSim
 from roarm_rl.picking import camera_ray, intersect_plane
@@ -113,10 +116,40 @@ def _open_chat():
         return None
 
 
-def run(hardware=None, chat=True):
+def _open_voice():
+    try:
+        from roarm_rl.voice import VoiceListener
+
+        listener = VoiceListener()
+        listener.start()
+        return listener
+    except Exception as e:  # sounddevice / faster-whisper not installed
+        print(f"[voice] unavailable: {e}")
+        return None
+
+
+MIC_STATUS = {
+    "loading": ("Mic: loading the speech model...", False),
+    "listening": ("Mic: listening", False),
+    "hearing": ("Mic: hearing you...", True),
+    "thinking": ("Mic: working out what you said...", True),
+    "muted": ("Mic: muted", False),
+}
+
+
+def run(hardware=None, chat=True, voice=True, compose=True):
     sim = RoArmSim(gui=True)
     chat = _open_chat() if chat else None
+    voice = _open_voice() if voice else None
+    composer = Composer() if compose and composer_available() else None
     player = GesturePlayer()
+    if chat is not None and voice is None:
+        chat.hide_mic()
+
+    def tell(text):
+        print(f"[arm] {text}")
+        if chat is not None:
+            chat.say(text)
     limits = sim.joint_limits
 
     joints = list(sim.home_radians)
@@ -155,15 +188,59 @@ def run(hardware=None, chat=True):
             if _tapped(keys, KEY_P):
                 mirroring = not mirroring
                 print(f"[mirror] {'ON' if mirroring else 'OFF'}")
-            if chat is not None:
-                for text in chat.poll():
-                    result = intent.interpret(text)
-                    if result.abort:
-                        player.cancel()
-                    for g in result.gestures:
-                        player.enqueue(g.label, g.keyframes)
-                    chat.say(result.reply)
-                    print(f"[chat] {text!r} -> {result.reply}")
+            lines = chat.poll() if chat is not None else []
+            if voice is not None:
+                voice.enabled = chat.mic_on if chat is not None else True
+                for text in voice.poll():
+                    print(f"[voice] {text}")
+                    if chat is not None:
+                        chat.heard(text)
+                    lines.append(text)
+                if chat is not None and voice.status != "error":
+                    if composer is not None and composer.busy:
+                        chat.set_status("Inventing a new gesture...", True)
+                    else:
+                        chat.set_status(*MIC_STATUS.get(voice.status, ("", False)))
+                elif chat is not None:
+                    if voice.status == "error":
+                        chat.set_status("Mic unavailable, typing still works")
+                        chat.hide_mic()
+                        chat.note(f"Voice input is off: {voice.error}")
+                        print(f"[voice] {voice.error}")
+                        voice = None
+
+            for text in lines:
+                result = intent.interpret(text)
+                if result.abort:
+                    player.cancel()
+                for g in result.gestures:
+                    player.enqueue(g.label, g.keyframes)
+                # Nothing in the library fits: have a new gesture designed.
+                missing = result.unknown[0] if result.unknown else None
+                if missing and len(missing.split()) >= 2 and composer is not None:
+                    if composer.request(missing):
+                        if result.gestures:
+                            tell(result.reply.splitlines()[0])
+                        tell(f"I don't know \"{missing}\" yet. Give me a few seconds to invent it.")
+                        continue
+                # No inventor to ask: fall back to the closest thing already known.
+                if missing in result.guesses:
+                    guess = result.guesses[missing]
+                    player.enqueue(guess.label, guess.keyframes)
+                    tell(guess.label if not result.gestures
+                         else f"{result.reply.splitlines()[0]}  >  {guess.label}")
+                    continue
+                tell(result.reply)
+
+            if composer is not None:
+                for phrase, name, created, error in composer.poll():
+                    if error:
+                        tell(f"I couldn't invent a gesture for \"{phrase}\": {error}")
+                        continue
+                    player.enqueue(name, library.build(name))
+                    shown = name.replace("_", " ")
+                    tell(f"Learned a new gesture: {shown}" if created
+                         else f"That sounds like my {shown}. I'll remember that.")
 
             if _tapped(keys, KEY_H):
                 player.cancel()
@@ -234,7 +311,8 @@ def run(hardware=None, chat=True):
                 if _held(keys, COMMA):
                     joints[3] -= JOINT_STEP
 
-            joints = sim.set_joint_targets(joints)
+            # gestures swing harder than the keyboard does; let the sim motors keep up
+            joints = sim.set_joint_targets(joints, max_velocity=6.0 if gesture_pose is not None else 2.0)
             sim.step()
 
             if mode_ik:
@@ -276,6 +354,8 @@ def run(hardware=None, chat=True):
         pass  # GUI window closed
     finally:
         sim.close()
+        if voice is not None:
+            voice.stop()
         if chat is not None:
             chat.close()
         if hardware is not None and hardware.connected:

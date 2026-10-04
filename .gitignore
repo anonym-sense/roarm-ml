@@ -14,3 +14,5 @@ timings_*.json
 Thumbs.db
 desktop.ini
 .DS_Store
+
+*.local.json

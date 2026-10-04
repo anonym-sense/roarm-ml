@@ -43,8 +43,11 @@ GESTURES = {
     ],
 }
 
-# Firmware limits intersected with URDF limits (see roarm_rl.sim._FIRMWARE_LIMITS_M2).
-SAFE_BOUNDS = [(-0.6, 0.6), (-0.3, 0.4), (1.0, 2.2), (0.0, 0.8)]
+# Range gestures may use, well inside the firmware limits (see
+# roarm_rl.sim._FIRMWARE_LIMITS_M2). The shoulder-forward / elbow-down corner
+# is what sets it: at (0.55, 2.1) the gripper is still about 5 cm above the
+# table, so any pose inside the box clears the surface the arm stands on.
+SAFE_BOUNDS = [(-1.2, 1.2), (-0.6, 0.55), (0.7, 2.1), (0.0, 1.2)]
 COMMAND_HZ = 25
 LEAD_IN_SPEED = 0.8  # rad/s when moving from the current pose to a gesture's first pose
 

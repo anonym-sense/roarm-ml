@@ -13,6 +13,7 @@ import difflib
 import re
 from dataclasses import dataclass, field
 
+from roarm_rl import library
 from roarm_rl.library import MOTIONS, build, variant_name
 
 KEYWORDS = {
@@ -114,12 +115,13 @@ DIRECTIONAL = {
 SPEED_WORDS = {
     "slow": ["slow", "slowly", "gently", "gentle", "calmly", "lazily", "carefully", "softly", "soft"],
     "fast": ["fast", "quick", "quickly", "rapidly", "rapid", "hurry", "energetic", "energetically",
-             "hard", "frantically", "wildly", "speedy"],
+             "frantically", "wildly", "speedy", "faster"],
 }
 SIZE_WORDS = {
     "small": ["small", "little", "tiny", "subtle", "slightly", "slight", "bit", "mini"],
     "big": ["big", "large", "huge", "wide", "exaggerated", "giant", "massive", "dramatic",
-            "dramatically", "lot", "enthusiastically"],
+            "dramatically", "lot", "enthusiastically", "strong", "strongly", "stronger",
+            "powerful", "deep", "deeply", "full", "hard", "bigger"],
 }
 SIDE_WORDS = {"left": "left", "right": "right"}
 VERTICAL_WORDS = {"up": "up", "upward": "up", "upwards": "up", "above": "up", "sky": "up",
@@ -137,16 +139,40 @@ _IDIOMS = ["up and down", "back and forth", "side to side", "to and fro"]
 _SPLIT = re.compile(r"\b(?:and then|then|and|after that|followed by)\b|[,;.!]+")
 _FILLER = {"please", "pls", "robot", "roarm", "arm", "the", "a", "an", "kindly", "just", "now"}
 
-_PHRASES = sorted(
-    ((tuple(kw.split()), name) for name, kws in KEYWORDS.items() for kw in kws),
-    key=lambda item: -len(item[0]),
-)
 _MODIFIER_VOCAB = (
     {w for ws in SPEED_WORDS.values() for w in ws}
     | {w for ws in SIZE_WORDS.values() for w in ws}
     | set(SIDE_WORDS) | set(VERTICAL_WORDS) | set(NUMBER_WORDS) | {"times", "time", "again"}
 )
-_VOCAB = {tok for phrase, _ in _PHRASES for tok in phrase} | _MODIFIER_VOCAB
+# Words that say nothing about which motion is meant; ignored when judging
+# how much of a sentence a match explains.
+_STOP = {"i", "im", "you", "me", "my", "your", "we", "it", "its", "is", "are", "was", "be", "being",
+         "do", "can", "could", "would", "will", "to", "for", "of", "in", "on", "at", "with", "that",
+         "this", "so", "some", "want", "lets", "let", "us", "thats", "today", "then", "like", "as",
+         "if", "there", "here", "have", "has", "am", "really", "very", "too", "again", "try"}
+_PHRASES = []  # [(token tuple, motion name)], longest first
+_LEARNED_PHRASES = []  # multi-word phrases of learned motions, matched on the whole line
+_VOCAB = set()
+
+
+def _words(text):
+    return [t for t in re.findall(r"[a-z0-9]+", text.lower().replace("'", "")) if t not in _FILLER]
+
+
+def reindex():
+    """Rebuild the phrase tables; call after roarm_rl.library learns a motion."""
+    global _PHRASES, _LEARNED_PHRASES, _VOCAB
+    pairs = [(tuple(kw.split()), name) for name, kws in KEYWORDS.items() for kw in kws]
+    learned = [(tuple(_words(kw)), name) for name, kws in library.LEARNED_KEYWORDS.items()
+               for kw in kws if name in MOTIONS]
+    learned = [(phrase, name) for phrase, name in learned if phrase]
+    _PHRASES = sorted(pairs + learned, key=lambda item: -len(item[0]))
+    _LEARNED_PHRASES = sorted((item for item in learned if len(item[0]) > 1),
+                              key=lambda item: -len(item[0]))
+    _VOCAB = {tok for phrase, _ in _PHRASES for tok in phrase} | _MODIFIER_VOCAB
+
+
+reindex()
 
 
 @dataclass
@@ -161,6 +187,8 @@ class Result:
     reply: str
     gestures: list = field(default_factory=list)
     abort: bool = False
+    unknown: list = field(default_factory=list)  # clauses nothing matched well
+    guesses: dict = field(default_factory=dict)  # unknown clause -> weak-match Gesture, if any
 
 
 def _normalize(token):
@@ -168,7 +196,7 @@ def _normalize(token):
     if token in _VOCAB or token.isdigit():
         return token
     stems = []
-    for suffix in ("ing", "ed", "es", "s", "ly"):
+    for suffix in ("ing", "ed", "es", "s", "ly", "er"):
         if token.endswith(suffix) and len(token) > len(suffix) + 2:
             stem = token[: -len(suffix)]
             stems += [stem, stem + "e"]
@@ -190,12 +218,19 @@ def _tokens(text):
 
 
 def _match_motion(tokens):
-    """Best motion for the clause by longest keyword phrase, or None."""
+    """(best motion or None, weak) by longest keyword phrase.
+
+    weak is True when a single stray word matched inside a longer sentence
+    whose other words went unexplained, e.g. "pretend you are a snake being
+    charmed" only hitting "snake". Such a sentence deserves a new gesture.
+    """
     scores = {}
+    covered = set()
     for phrase, name in _PHRASES:
         n = len(phrase)
         for i in range(len(tokens) - n + 1):
             if tuple(tokens[i:i + n]) == phrase:
+                covered.update(range(i, i + n))
                 # squared so one long phrase beats several stray single words;
                 # a lone modifier word ("forward", "five") barely counts
                 weight = 0.25 if n == 1 and phrase[0] in _MODIFIER_VOCAB else n * n
@@ -204,8 +239,11 @@ def _match_motion(tokens):
                     scores[name] += 0.5  # naming the motion outright breaks ties
                 break
     if not scores:
-        return None
-    return max(scores, key=lambda name: scores[name])
+        return None, False
+    best = max(scores, key=lambda name: scores[name])
+    unexplained = [t for i, t in enumerate(tokens) if i not in covered and t not in _STOP
+                   and t not in _MODIFIER_VOCAB and not t.isdigit()]
+    return best, scores[best] < 2 and len(unexplained) >= 2
 
 
 def _modifiers(tokens):
@@ -268,17 +306,27 @@ def interpret(text):
     if cleaned in HELP:
         return Result(help_text())
 
+    # A learned phrase may contain "and" or commas, so try the whole line first.
+    words = _words(text)
+    for phrase, name in _LEARNED_PHRASES:
+        n = len(phrase)
+        if any(tuple(words[i:i + n]) == phrase for i in range(len(words) - n + 1)):
+            mods = _modifiers(_tokens(text))
+            g = Gesture(_label(name, mods, "left"), variant_name(name, mods["speed"], mods["size"]),
+                        build(name, mods["speed"], mods["size"], reps=mods["reps"]))
+            return Result(g.label, [g])
+
     lowered = text.lower()
     for idiom in _IDIOMS:
         lowered = lowered.replace(idiom, " ")
 
-    picked, unknown = [], []  # picked: [motion name, modifiers]
+    picked, unknown, weak_picks = [], [], {}  # picked: [motion name, modifiers]
     for clause in _SPLIT.split(lowered):
         tokens = _tokens(clause)
         if not tokens:
             continue
         mods = _modifiers(tokens)
-        name = _match_motion(tokens)
+        name, weak = _match_motion(tokens)
         only_modifiers = all(t in _MODIFIER_VOCAB or t.isdigit() for t in tokens)
         if picked and only_modifiers:
             if mods["side"] or mods["vertical"]:
@@ -295,21 +343,28 @@ def interpret(text):
             else:
                 unknown.append(clause.strip())
                 continue
+        if weak:
+            unknown.append(clause.strip())
+            weak_picks[clause.strip()] = [name, mods]
+            continue
         picked.append([name, mods])
 
-    gestures = []
-    for name, mods in picked:
+    def make(name, mods):
         name = _resolve(name, mods)
         side = mods["side"] or "left"
-        gestures.append(Gesture(
+        return Gesture(
             label=_label(name, mods, side),
             name=variant_name(name, mods["speed"], mods["size"], side),
             keyframes=build(name, mods["speed"], mods["size"], side, mods["reps"]),
-        ))
+        )
+
+    gestures = [make(name, mods) for name, mods in picked]
+    guesses = {clause: make(name, mods) for clause, (name, mods) in weak_picks.items()}
 
     if not gestures:
-        return Result("I don't know a gesture for that yet. Type 'help' to see what I can do.")
+        return Result("I don't know a gesture for that yet. Type 'help' to see what I can do.",
+                      unknown=unknown, guesses=guesses)
     reply = "  >  ".join(g.label for g in gestures)
     if unknown:
         reply += f"\n(skipped: {'; '.join(unknown)})"
-    return Result(reply, gestures)
+    return Result(reply, gestures, unknown=unknown, guesses=guesses)

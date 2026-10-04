@@ -8,7 +8,7 @@ back whatever lines were sent since the last call.
 import tkinter as tk
 
 WELCOME = (
-    "Type what the arm should do and press Enter.\n"
+    "Say or type what the arm should do.\n"
     "Try:  hello   |   nod twice then wave slowly   |   point right\n"
     "      that was great!   |   look around   |   help"
 )
@@ -23,6 +23,7 @@ class ChatWindow:
         self._history = []
         self._history_pos = 0
         self.closed = False
+        self.mic_on = True  # toggled by the Mic button; read by roarm_rl.app
 
         self._root = tk.Tk()
         self._root.title(title)
@@ -41,6 +42,16 @@ class ChatWindow:
         self._entry.bind("<Return>", self._submit)
         self._entry.bind("<Up>", lambda e: self._recall(-1))
         self._entry.bind("<Down>", lambda e: self._recall(1))
+
+        status_row = tk.Frame(self._root, bg=PANEL)
+        status_row.pack(side=tk.TOP, fill=tk.X)
+        self._status = tk.Label(status_row, text="", bg=PANEL, fg=NOTE, anchor="w",
+                                font=("Segoe UI", 9), padx=10, pady=5)
+        self._status.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self._mic_button = tk.Button(status_row, text="Mute mic", command=self._toggle_mic,
+                                     bg=PANEL, fg=FG, activebackground=BG, activeforeground=FG,
+                                     relief=tk.FLAT, padx=10)
+        self._mic_button.pack(side=tk.RIGHT)
 
         scroll = tk.Scrollbar(self._root)
         scroll.pack(side=tk.RIGHT, fill=tk.Y)
@@ -80,6 +91,24 @@ class ChatWindow:
         if self._history_pos < len(self._history):
             self._entry.insert(0, self._history[self._history_pos])
         return "break"
+
+    def _toggle_mic(self):
+        self.mic_on = not self.mic_on
+        self._mic_button.configure(text="Mute mic" if self.mic_on else "Unmute mic")
+
+    def set_status(self, text, active=False):
+        """One-line status under the title bar, e.g. the microphone state."""
+        if not self.closed and self._status.cget("text") != text:
+            self._status.configure(text=text, fg=ARM if active else NOTE)
+
+    def hide_mic(self):
+        if not self.closed:
+            self._mic_button.pack_forget()
+
+    def heard(self, text):
+        """Show a line that came from the microphone."""
+        if not self.closed:
+            self._append(f"you   {text}   (voice)", "you")
 
     def say(self, text):
         """Show a reply from the arm."""

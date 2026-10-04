@@ -12,11 +12,17 @@ fast big one. Normalized keyframe fields:
 1.0 maps to the edge of roarm_rl.gesture.SAFE_BOUNDS, so no variant can leave
 the range that is safe to send to the real arm.
 
+Motions added at run time (roarm_rl.composer) use the same units and live in
+gestures/learned.json; they are loaded on import.
+
 catalog() names every variant (nod, nod_fast, nod_slow_big, peek_right, ...)
 for roarm_rl.gesture's CLI; roarm_rl.intent picks variants from chat text.
 """
 
+import json
 import math
+import os
+import re
 from dataclasses import dataclass
 from typing import Callable, Optional
 
@@ -49,11 +55,14 @@ def _loop(n, points, dur, fn):
 # --- Motions. n = repeat count, side = +1 (left) or -1 (right). ----------------
 
 def _nod(n, side):
-    return [R()] + [K(.28, u=-.55), K(.28, u=.2)] * n + [R(.4)]
+    # Whole arm: rear back with the hand high, then throw shoulder and forearm down.
+    return ([R(), K(.22, s=-.35, u=.5)]
+            + [K(.24, s=.8, u=-.9, g=.25), K(.24, s=-.3, u=.45)] * n + [R(.4)])
 
 
 def _shake(n, side):
-    return [R()] + [K(.3, b=.5, u=.15), K(.3, b=-.5, u=.15)] * n + [R(.4)]
+    return ([R(), K(.2, s=-.2, u=.3)]
+            + [K(.3, b=.55, s=.15, u=.25), K(.3, b=-.55, s=.15, u=.25)] * n + [R(.4)])
 
 
 def _wave(n, side):
@@ -264,7 +273,7 @@ def _approve(n, side):
 
 
 def _bounce(n, side):
-    return [R()] + [K(.2, u=.5), K(.2, u=-.2)] * n + [R(.3)]
+    return [R()] + [K(.2, s=-.3, u=.6), K(.2, s=.3, u=-.4)] * n + [R(.3)]
 
 
 def _sway(n, side):
@@ -299,7 +308,7 @@ def _dance(n, side):
 
 
 def _twist(n, side):
-    return [R()] + [K(.35, b=1), K(.5, b=-1)] * n + [K(.3, b=.4), R(.3)]
+    return [R()] + [K(.5, b=1, u=.3), K(.8, b=-1, u=.3)] * n + [K(.4, b=.4), R(.4)]
 
 
 def _flex(n, side):
@@ -365,6 +374,7 @@ class Motion:
     reps: Optional[int] = None  # default repeat count; None = not a repeating motion
     sided: bool = False  # has distinct left/right versions
     about: str = ""
+    learned: bool = False  # came from gestures/learned.json
 
 
 MOTIONS = {
@@ -437,6 +447,100 @@ MOTIONS = {
 }
 
 
+# --- Learned motions: added at run time, stored in gestures/learned.json --------
+
+LEARNED_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "gestures", "learned.json")
+LEARNED_KEYWORDS = {}  # motion name -> trigger phrases, read by roarm_rl.intent
+MAX_KEYFRAMES = 60
+MAX_SECONDS = 15.0
+
+
+def clean_keyframes(raw):
+    """Validate [[dur, b, s, u, g], ...] and clamp it into the normalized range."""
+    if not isinstance(raw, list) or not 2 <= len(raw) <= MAX_KEYFRAMES:
+        raise ValueError(f"need 2..{MAX_KEYFRAMES} keyframes")
+    out = []
+    for i, row in enumerate(raw):
+        if not isinstance(row, (list, tuple)) or len(row) != 5:
+            raise ValueError(f"keyframe {i} must be [dur, b, s, u, g]")
+        dur, b, s, u, g = (float(v) for v in row)
+        if not all(math.isfinite(v) for v in (dur, b, s, u, g)):
+            raise ValueError(f"keyframe {i} has a non-finite value")
+        dur = 0.0 if i == 0 else max(0.08, min(3.0, dur))
+        b, s, u = (max(-1.0, min(1.0, v)) for v in (b, s, u))
+        out.append([round(dur, 3), round(b, 3), round(s, 3), round(u, 3),
+                    round(max(0.0, min(1.0, g)), 3)])
+    if sum(row[0] for row in out) > MAX_SECONDS:
+        raise ValueError(f"longer than {MAX_SECONDS:.0f} s")
+    return out
+
+
+def _register(name, about, keywords, rows):
+    norm = [K(*row) for row in rows]
+    MOTIONS[name] = Motion(lambda n, side, norm=norm: list(norm), about=about, learned=True)
+    LEARNED_KEYWORDS[name] = list(keywords)
+
+
+def _read_learned():
+    try:
+        with open(LEARNED_PATH, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {"motions": {}, "aliases": {}}
+
+
+def _write_learned(data):
+    os.makedirs(os.path.dirname(LEARNED_PATH), exist_ok=True)
+    tmp = LEARNED_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
+        text = json.dumps(data, indent=1)
+        # keep each keyframe on one line
+        text = re.sub(r"\[\s+(-?[\d.]+(?:,\s+-?[\d.]+)*)\s+\]",
+                      lambda m: "[" + " ".join(m.group(1).split()) + "]", text)
+        f.write(text + "\n")
+    os.replace(tmp, LEARNED_PATH)
+
+
+def load_learned():
+    data = _read_learned()
+    for name, m in data.get("motions", {}).items():
+        try:
+            _register(name, m.get("about", ""), m.get("keywords", []), clean_keyframes(m["keyframes"]))
+        except (KeyError, ValueError, TypeError) as e:
+            print(f"[library] skipping learned motion '{name}': {e}")
+    for phrase, name in data.get("aliases", {}).items():
+        if name in MOTIONS:
+            LEARNED_KEYWORDS.setdefault(name, []).append(phrase)
+
+
+def add_learned(name, about, keywords, keyframes):
+    """Validate, register and save a new motion. Returns the name it was stored under."""
+    name = re.sub(r"[^a-z0-9]+", "_", str(name).lower()).strip("_")[:40] or "motion"
+    base, k = name, 2
+    while name in MOTIONS:
+        name, k = f"{base}_{k}", k + 1
+    rows = clean_keyframes(keyframes)
+    keywords = sorted({str(kw).lower().strip() for kw in keywords if str(kw).strip()})
+    _register(name, str(about)[:120], keywords, rows)
+    data = _read_learned()
+    data.setdefault("motions", {})[name] = {"about": str(about)[:120], "keywords": keywords,
+                                            "keyframes": rows}
+    _write_learned(data)
+    return name
+
+
+def add_alias(phrase, name):
+    """Remember that `phrase` means the existing motion `name`."""
+    if name not in MOTIONS:
+        raise KeyError(name)
+    phrase = str(phrase).lower().strip()
+    LEARNED_KEYWORDS.setdefault(name, []).append(phrase)
+    data = _read_learned()
+    data.setdefault("aliases", {})[phrase] = name
+    _write_learned(data)
+
+
 def _to_radians(norm, amp):
     b, s, u, g = norm
     b, s, u = (max(-1.0, min(1.0, v * amp)) for v in (b, s, u))
@@ -482,3 +586,6 @@ def catalog():
                 for size in SIZES:
                     out[variant_name(name, speed, size, side)] = build(name, speed, size, side)
     return out
+
+
+load_learned()

@@ -13,6 +13,9 @@ def parse_args():
     parser.add_argument("--baudrate", type=int, default=115200)
     parser.add_argument("--host", default="192.168.4.1", help="RoArm IP address for --hw http")
     parser.add_argument("--no-chat", action="store_true", help="do not open the chat window")
+    parser.add_argument("--no-voice", action="store_true", help="do not listen on the microphone")
+    parser.add_argument("--no-compose", action="store_true",
+                        help="do not invent new gestures for unknown phrases")
     return parser.parse_args()
 
 
@@ -31,7 +34,8 @@ def main():
             print(f"[hardware] {e}", file=sys.stderr)
             hardware = None
 
-    run(hardware=hardware, chat=not args.no_chat)
+    run(hardware=hardware, chat=not args.no_chat, voice=not args.no_voice,
+        compose=not args.no_compose)
 
 
 if __name__ == "__main__":

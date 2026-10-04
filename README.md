@@ -20,13 +20,16 @@ joint vector so nothing needs translating between sim and hardware.
 | Module | What it does |
 | --- | --- |
 | `roarm_rl/sim.py` | `RoArmSim`: PyBullet wrapper with joint control, FK/IK and joint limits |
-| `roarm_rl/app.py` | Interactive 3D GUI: keyboard control, click-and-drag on the arm, chat |
+| `roarm_rl/app.py` | Interactive 3D GUI: keyboard control, click-and-drag on the arm, voice and chat |
 | `roarm_rl/picking.py` | Mouse-ray math behind the click-and-drag |
 | `roarm_rl/hardware.py` | `RoArmHardware`: mirrors joint targets to a real arm via `roarm_sdk` |
 | `roarm_rl/gesture.py` | Plays keyframe gestures on a Catmull-Rom spline, in sim or on the arm |
 | `roarm_rl/library.py` | 66 hand-designed motions with speed, size and side variants |
 | `roarm_rl/intent.py` | Maps a line of chat text to gestures (offline keyword matching) |
 | `roarm_rl/chat.py` | The chat window |
+| `roarm_rl/voice.py` | Microphone to text, offline (faster-whisper) |
+| `roarm_rl/composer.py` | Invents a gesture for an unknown phrase via an external language model |
+| `gestures/learned.json` | Gestures invented so far |
 | `roarm_rl/env.py` | `RoArmReachEnv`: Gymnasium reach task |
 | `roarm_rl/train.py` | PPO training and evaluation (Stable-Baselines3) |
 | `roarm_rl/main.py` | CLI entry point for the GUI |
@@ -85,34 +88,68 @@ camera first to reach a different depth.
 Mirroring is off by default even when `--hw` connects. Once on, joint targets
 are throttled to about 12 Hz so the servo bus isn't flooded.
 
-## Chat
+## Talking to the arm
 
-The GUI opens a second window with a chat box. Type what the arm should do
-and press Enter; the reply shows which gestures were picked, and they play in
-the simulator (and on the real arm when mirroring is on).
+The GUI opens a second window. Speak, or type and press Enter; the reply
+shows which gestures were picked, and they play in the simulator (and on the
+real arm when mirroring is on).
 
 ```
 hello
 nod twice then wave slowly
+give me a strong nod
 point right
 thanks, that was great!
-look left and right
-small circle, fast
+pretend you are a snake being charmed
 stop
 ```
 
-- Words like `slowly` / `fast`, `small` / `big`, `left` / `right` and counts
-  like `twice` or `3 times` choose the variant.
+- Words like `slowly` / `fast`, `small` / `big` / `strong`, `left` / `right`
+  and counts like `twice` or `3 times` choose the variant.
 - `then`, `and` or a comma chains gestures.
 - It also reacts to plain remarks: `good job` celebrates, `no way` acts
   surprised, `good night` goes to sleep.
 - `help` lists every motion. `stop`, `H`, or grabbing the arm with the mouse
   cancels what is playing.
 
-The matching is offline keyword lookup in `roarm_rl/intent.py`: each motion
-lists the words and phrases that trigger it, and the longest match wins. There
-is no language model behind it, so it only understands phrases close to those
-lists. Run with `--no-chat` to skip the window.
+**Voice** (`roarm_rl/voice.py`) is offline: the microphone stream is cut into
+utterances by loudness and transcribed with
+[faster-whisper](https://github.com/SYSTRAN/faster-whisper) on the CPU, about
+a third of a second per phrase. The first run downloads the speech model
+(about 150 MB). The status line shows what the mic is doing and the button
+mutes it. If the microphone cannot be opened the window says so and typing
+still works. Test the mic on its own with `python -m roarm_rl.voice`.
+
+**Finding a gesture** (`roarm_rl/intent.py`) is offline keyword lookup: each
+motion lists the words and phrases that trigger it, and the longest match
+wins. It is instant, and only understands phrases close to those lists.
+
+**Inventing a gesture** (`roarm_rl/composer.py`, optional): when a sentence
+matches nothing, or only one stray word of it does, it can be handed to a
+language model, which either names an existing motion or writes new
+keyframes. Those are clamped to the safe range, saved to
+`gestures/learned.json`, and played. That takes a few seconds the first time;
+afterwards the phrase is an instant lookup.
+
+Nothing is configured out of the box. Point it at any command-line program
+that reads a prompt on stdin and prints the model's reply on stdout, either
+in a git-ignored `designer.local.json` in the project folder:
+
+```
+{"command": ["my-llm-cli", "--some-flag"]}
+```
+
+or in the `ROARM_DESIGNER_CMD` environment variable. Whatever you configure
+receives the sentence you said, so a hosted model means that text leaves your
+machine. This project never reads or stores an API key; keep keys in your
+tool's own configuration. Without a command, or with `--no-compose`, the
+closest known motion is used instead.
+
+```
+python -m roarm_rl.composer "act like a cat stretching after a nap"
+```
+
+Flags: `--no-voice`, `--no-compose`, `--no-chat`.
 
 ## Gestures
 
@@ -127,13 +164,17 @@ grab, celebrate, circle, ...). Each is written once in normalized units and
 generated at three speeds and three sizes, mirrored left/right where that
 makes sense, which gives 702 named variants such as `nod_slow_big` or
 `peek_right_fast`. They are variations of those 66 motions, not 702 separately
-designed ones, and none of them is learned.
+designed ones. Motions the composer invents are added on top.
 
 Gestures are lists of `(duration, pose)` keyframes joined by a Catmull-Rom
 spline, so velocity stays continuous through each pose. The keyframes use
 animation-style timing: anticipation before a big move, overshoot and settle,
-and the gripper trailing the wrist. Every pose is kept inside a conservative
-safe range before anything is sent to the arm.
+and the gripper trailing the wrist. Motions use the whole arm: a nod rears
+back and throws the shoulder and forearm down together.
+
+Every pose is kept inside `SAFE_BOUNDS` (base +/-1.2 rad, shoulder -0.6 to
+0.55, elbow 0.7 to 2.1, gripper 0 to 1.2). In the simulator every variant
+keeps the hand at least 4.5 cm above the table and never self-collides.
 
 ## Reinforcement learning
 
@@ -166,10 +207,13 @@ Training runs headless with PPO and writes checkpoints to
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
-- The chat window and gesture library have been run in the simulator only;
-  the library gestures have not been played on the physical arm yet.
+- The chat window, gesture library and gesture inventor have been run in the
+  simulator only. The wider motion range and the library gestures have not
+  been played on the physical arm yet; try a `small` variant first.
+- Voice input was tested on synthesized speech fed through the same
+  segmenting and transcription code, not yet on a live microphone.
 - Not built yet: replaying a trained policy on the real arm, and gestures
-  learned by RL rather than written by hand.
+  learned by RL rather than written by hand or by the composer.
 
 ## License
 

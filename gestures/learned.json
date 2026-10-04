@@ -1,0 +1,60 @@
+{
+ "motions": {
+  "cat_stretch": {
+   "about": "Wakes from a curl, does a front-down play-bow stretch with a raised rear, then arches up, shakes off and settles.",
+   "keywords": [
+    "act like a cat stretching after a nap",
+    "after a nap",
+    "cat stretch",
+    "cat stretching",
+    "stretch like a cat",
+    "wake up and stretch"
+   ],
+   "keyframes": [
+    [0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.5, 0.0, -0.3, -0.4, 0.0],
+    [0.6, 0.0, -0.1, -0.2, 0.2],
+    [0.4, 0.0, -0.35, 0.2, 0.0],
+    [0.9, 0.0, 0.95, -0.9, 0.3],
+    [0.8, 0.0, 1.0, -0.7, 1.0],
+    [0.9, 0.15, 1.0, -0.8, 1.0],
+    [0.5, 0.0, 0.5, -0.3, 0.4],
+    [0.5, 0.0, -0.5, 0.4, 0.0],
+    [0.9, 0.0, -0.8, 1.0, 1.0],
+    [0.8, -0.1, -0.9, 1.0, 1.0],
+    [0.5, 0.0, -0.4, 0.5, 0.4],
+    [0.2, 0.3, 0.0, 0.0, 0.2],
+    [0.2, -0.3, 0.0, 0.0, 0.2],
+    [0.2, 0.2, 0.0, 0.0, 0.0],
+    [0.7, 0.0, 0.0, 0.0, 0.0]
+   ]
+  },
+  "snake_charmed": {
+   "about": "Arm rises like a cobra from a basket, sways hypnotically side to side with a slow head weave, then sinks back down entra",
+   "keywords": [
+    "charmed snake",
+    "cobra",
+    "hypnotized snake",
+    "pretend you are a snake being charmed",
+    "snake being charmed",
+    "snake charmer"
+   ],
+   "keyframes": [
+    [0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.5, 0.0, 0.4, -0.6, 0.0],
+    [0.9, 0.0, -0.5, 0.9, 0.3],
+    [0.7, 0.5, -0.7, 1.0, 1.0],
+    [0.9, -0.5, -0.5, 0.8, 0.5],
+    [0.9, 0.55, -0.7, 1.0, 1.0],
+    [0.9, -0.55, -0.5, 0.8, 0.5],
+    [0.9, 0.4, -0.65, 0.95, 0.9],
+    [0.8, -0.3, -0.4, 0.7, 0.4],
+    [0.7, 0.0, -0.6, 1.0, 1.0],
+    [0.5, 0.0, -0.3, 0.5, 0.2],
+    [0.9, 0.0, 0.3, -0.5, 0.0],
+    [0.7, 0.0, 0.0, 0.0, 0.0]
+   ]
+  }
+ },
+ "aliases": {}
+}
