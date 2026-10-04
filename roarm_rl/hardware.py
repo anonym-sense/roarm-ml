@@ -60,11 +60,16 @@ class RoArmHardware:
         except Exception as e:
             raise RoArmHardwareError(f"Could not connect to RoArm-M2: {e}") from e
 
-    def set_joint_targets(self, radians):
-        """radians: [base, shoulder, elbow, gripper], already limit-clamped."""
+    def set_joint_targets(self, radians, speed=None, acc=None):
+        """radians: [base, shoulder, elbow, gripper], already limit-clamped.
+
+        speed / acc override the defaults for this one command (servo units).
+        """
         if not self.connected:
             raise RoArmHardwareError("not connected")
-        self._arm.joints_radian_ctrl(radians=list(radians), speed=self.speed, acc=self.acc)
+        self._arm.joints_radian_ctrl(radians=list(radians),
+                                     speed=self.speed if speed is None else speed,
+                                     acc=self.acc if acc is None else acc)
 
     def get_joint_positions(self):
         """Measured [base, shoulder, elbow, gripper] radians, or None if the read failed.

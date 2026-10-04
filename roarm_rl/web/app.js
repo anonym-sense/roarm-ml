@@ -88,8 +88,78 @@ function buildScene() {
   };
   new ResizeObserver(resize).observe($("stage"));
   resize();
+  enableDragging();
   renderer.setAnimationLoop(frame);
 }
+
+// Drag the arm: the hand follows the pointer on a plane facing the camera,
+// at the depth where the arm was grabbed.
+const ray = new THREE.Raycaster();
+const dragPlane = new THREE.Plane();
+let drag = null;
+let lastReach = 0;
+const marker = new THREE.Mesh(new THREE.SphereGeometry(0.012, 20, 20),
+  new THREE.MeshBasicMaterial({ color: 0x5cc8ff, transparent: true, opacity: 0.85 }));
+marker.visible = false;
+scene.add(marker);
+
+function aim(e) {
+  const box = $("view").getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX - box.left) / box.width) * 2 - 1,
+    -((e.clientY - box.top) / box.height) * 2 + 1), camera);
+  return ray.intersectObjects(parts, true)[0];
+}
+
+function enableDragging() {
+  // capture phase on the parent, so this runs before the orbit controls see the press
+  $("stage").addEventListener("pointerdown", (e) => {
+    if (e.target !== $("view") || !state?.links || state.torque === false) return;
+    const hit = aim(e);
+    if (!hit) return;
+    controls.enabled = false;
+    const tip = state.links[state.links.length - 1];
+    const hand = robot.localToWorld(new THREE.Vector3(tip[0], tip[1], tip[2]));
+    dragPlane.setFromNormalAndCoplanarPoint(camera.getWorldDirection(new THREE.Vector3()).negate(), hit.point);
+    drag = { offset: hand.sub(hit.point) };
+    $("view").classList.add("grabbing");
+  }, true);
+  window.addEventListener("pointermove", (e) => {
+    if (!drag) {
+      if (e.target === $("view") && e.pointerType === "mouse") $("view").classList.toggle("grab", !!aim(e));
+      return;
+    }
+    aim(e);
+    const point = new THREE.Vector3();
+    if (!ray.ray.intersectPlane(dragPlane, point)) return;
+    point.add(drag.offset);
+    marker.position.copy(point);
+    marker.visible = true;
+    const now = performance.now();
+    if (now - lastReach < 45) return;
+    lastReach = now;
+    const local = robot.worldToLocal(point.clone());
+    post("/api/reach", { xyz: [local.x, local.y, local.z] });
+  });
+  const release = () => {
+    if (!drag) return;
+    drag = null;
+    controls.enabled = true;
+    marker.visible = false;
+    $("view").classList.remove("grabbing");
+  };
+  window.addEventListener("pointerup", release);
+  window.addEventListener("pointercancel", release);
+}
+
+// Read-only hooks for automated checks of the 3D view.
+window.__project = () => {
+  if (!state?.links) return null;
+  const tip = state.links[state.links.length - 1];
+  const p = robot.localToWorld(new THREE.Vector3(tip[0], tip[1], tip[2])).project(camera);
+  const box = $("view").getBoundingClientRect();
+  return { x: Math.round(box.left + (p.x + 1) / 2 * box.width), y: Math.round(box.top + (1 - p.y) / 2 * box.height) };
+};
+window.__camera = () => camera.position.toArray().map((v) => +v.toFixed(3)).join(",");
 
 function loadRobot() {
   if (!renderer) return;

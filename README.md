@@ -76,7 +76,8 @@ python -m roarm_rl.server --hw serial          # with the real arm on USB
 One page, laid out for a desktop or a phone:
 
 - **3D view** of the arm, drawn in the browser with three.js from the poses
-  the server streams. Drag to orbit, pinch or scroll to zoom.
+  the server streams. Drag the arm itself to move its hand (inverse
+  kinematics); drag anywhere else to orbit, pinch or scroll to zoom.
 - **Chat**: type or tap the microphone and speak. Each reply has *Good* and
   *Not like that* buttons.
 - **Gestures**: every motion as a card; pick speed, size and side, tap to play.
@@ -87,6 +88,14 @@ The real arm only moves when the server was started with `--hw serial` (the
 USB port is found automatically, or pass `--port`) or `--hw http`, **and** the
 Mirror switch in the Control tab is on. Without `--hw` the page drives the
 simulation only.
+
+While mirroring, gestures are sent to the arm slightly ahead of the picture
+and slowed to what the servos can follow, so the real arm stays in step and
+keeps the full reach of each motion. Measured on a RoArm-M2 over USB, the arm
+starts moving about 0.2 s after a command and tops out near 1.9 rad/s; with
+those corrections it stayed within about 0.06 rad of the picture on average
+through normal and big nods and a wave. When mirroring is switched on, the
+arm first closes any gap to the picture slowly.
 
 The Control tab also has a **Motors holding** switch. Turning it off (it asks
 you to confirm, because the arm goes limp and can fall) releases the motors
@@ -282,8 +291,10 @@ Training runs headless with PPO and writes checkpoints to
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
 - The web app was tested in the simulator from a desktop browser, including
-  speech sent as a recorded file. It has not been tried on a physical phone,
-  with a live microphone, or with the real arm attached.
+  speech sent as a recorded file, and its mirroring was measured on a real
+  RoArm-M2 over USB (joints land within about 0.01 rad of a commanded pose).
+  It has not been tried on a physical phone or with a live microphone, and
+  releasing the motors was only tested against a stand-in for the arm.
 - The chat window, gesture library and gesture inventor have been run in the
   simulator only. The wider motion range and the library gestures have not
   been played on the physical arm yet; try a `small` variant first.

@@ -47,8 +47,18 @@ CERT_DIR = os.path.join(_ROOT, "certs")
 
 TICK_HZ = 60
 MANUAL_SPEED = 1.5  # rad/s when following the sliders
-MIRROR_MIN_INTERVAL = 0.08  # seconds; avoid flooding the servo bus
-MIRROR_EPSILON = 0.01  # radians; skip resend if target barely changed
+REACH_SPEED = 3.0  # rad/s when the hand is dragged in the 3D view
+MIN_REACH_HEIGHT = 0.04  # m; a dragged target is kept this far above the table
+MIRROR_MIN_INTERVAL = 0.04  # seconds; avoid flooding the servo bus
+MIRROR_EPSILON = 0.004  # radians; skip resend if target barely changed
+# Measured on a RoArm-M2 over USB: the arm starts moving about 0.2 s after a
+# command and tops out near 1.9 rad/s. Gestures are sent that far ahead of the
+# picture and stretched to fit that speed, so the real arm stays in step.
+ARM_LATENCY = 0.18
+ARM_MAX_SPEED = 1.6
+ARM_FAST = (1500, 60)  # servo speed, acceleration while following
+ARM_GENTLE = (300, 10)  # while catching up after mirroring is switched on
+CATCH_UP_SPEED = 0.4  # rad/s the arm manages at ARM_GENTLE
 COOKIE = "roarm_access"
 
 
@@ -72,6 +82,7 @@ class Robot:
         self.mirroring = False
         self.torque = True  # False: motors released, the view follows the real arm
         self._torque_request = None
+        self._catching_up = False  # mirroring was just switched on
         self.player = GesturePlayer()
         self.brain = Brain()
         self.composer = Composer() if composer_available() else None
@@ -79,6 +90,8 @@ class Robot:
         self.state = {}
         self._lock = threading.RLock()
         self._goal = None
+        self._goal_speed = MANUAL_SPEED
+        self._reach = None
         self._home = False
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._run, daemon=True)
@@ -139,11 +152,19 @@ class Robot:
     def set_joints(self, q):
         with self._lock:
             self.player.cancel()
-            self._goal = [float(v) for v in q[:4]]
+            self._goal, self._goal_speed = [float(v) for v in q[:4]], MANUAL_SPEED
+
+    def reach(self, xyz):
+        """Move the hand toward a point (metres, simulator frame); solved on the simulator thread."""
+        with self._lock:
+            self.player.cancel()
+            self._reach = [float(xyz[0]), float(xyz[1]), max(MIN_REACH_HEIGHT, float(xyz[2]))]
 
     def set_mirror(self, on):
-        self.mirroring = (bool(on) and self.torque
-                          and self.hardware is not None and self.hardware.connected)
+        on = bool(on) and self.torque and self.hardware is not None and self.hardware.connected
+        self._catching_up = on and not self.mirroring
+        self.mirroring = on
+        self.player.max_speed = ARM_MAX_SPEED if on else None
         return self.mirroring
 
     def set_torque(self, on):
@@ -159,7 +180,7 @@ class Robot:
         sim = RoArmSim(gui=False)
         links = [j for j in range(p.getNumJoints(sim.robot, physicsClientId=sim.client_id))]
         q = list(sim.home_radians)
-        last_sent, last_sent_at = None, 0.0
+        last_sent, last_sent_at, gentle_until = None, 0.0, 0.0
         dt = 1.0 / TICK_HZ
         next_tick = time.monotonic()
         try:
@@ -196,11 +217,17 @@ class Robot:
                             q = measured
                     if self._home:
                         self._home, self._goal = False, list(sim.home_radians)
+                        self._goal_speed = MANUAL_SPEED
+                    if self._reach is not None and self.torque:
+                        target, self._reach = self._reach, None
+                        solved = sim.solve_ik(target)[:3] + [q[3]]  # the gripper keeps its opening
+                        self._goal = [min(max(v, lo), hi) for v, (lo, hi) in zip(solved, SAFE_BOUNDS)]
+                        self._goal_speed = min(REACH_SPEED, ARM_MAX_SPEED) if self.mirroring else REACH_SPEED
                     pose = self.player.update(q)
                     if pose is not None:
                         q, self._goal = pose, None
                     elif self._goal is not None:
-                        step = MANUAL_SPEED * dt
+                        step = self._goal_speed * dt
                         q = [a + max(-step, min(step, b - a)) for a, b in zip(q, self._goal)]
                     label = self.player.label
                     inventing = self.composer is not None and self.composer.busy
@@ -218,12 +245,24 @@ class Robot:
 
                 if self.mirroring:
                     now = time.monotonic()
-                    moved = last_sent is None or max(
-                        abs(a - b) for a, b in zip(q, last_sent)) > MIRROR_EPSILON
-                    if moved and now - last_sent_at > MIRROR_MIN_INTERVAL:
+                    if self._catching_up:
+                        # The arm may be far from the picture: close the gap slowly first.
+                        self._catching_up, last_sent = False, None
                         try:
-                            self.hardware.set_joint_targets(q)
-                            last_sent = list(q)
+                            measured = self.hardware.get_joint_positions()
+                        except Exception:
+                            measured = None
+                        gap = (max(abs(a - b) for a, b in zip(q, measured))
+                               if measured else 1.5)
+                        gentle_until = now + gap / CATCH_UP_SPEED + 0.3
+                    target = self.player.peek(ARM_LATENCY) or q
+                    moved = last_sent is None or max(
+                        abs(a - b) for a, b in zip(target, last_sent)) > MIRROR_EPSILON
+                    if moved and now - last_sent_at > MIRROR_MIN_INTERVAL:
+                        speed, acc = ARM_GENTLE if now < gentle_until else ARM_FAST
+                        try:
+                            self.hardware.set_joint_targets(target, speed, acc)
+                            last_sent = list(target)
                         except Exception as e:
                             print(f"[hardware] mirror failed: {e}")
                         last_sent_at = now
@@ -340,6 +379,14 @@ def create_app(robot, ears=None, access_code=None):
             return JSONResponse({"error": "q must be four numbers"}, status_code=400)
         # same box the gestures stay in, so the sliders cannot reach the table either
         robot.set_joints([min(max(float(v), lo), hi) for v, (lo, hi) in zip(q, SAFE_BOUNDS)])
+        return {"ok": True}
+
+    @app.post("/api/reach")
+    def reach(body: dict):
+        xyz = body.get("xyz")
+        if not isinstance(xyz, list) or len(xyz) != 3:
+            return JSONResponse({"error": "xyz must be three numbers"}, status_code=400)
+        robot.reach(xyz)
         return {"ok": True}
 
     @app.post("/api/stop")

@@ -50,6 +50,7 @@ GESTURES = {
 SAFE_BOUNDS = [(-1.2, 1.2), (-0.6, 0.55), (0.7, 2.1), (0.0, 1.2)]
 COMMAND_HZ = 25
 LEAD_IN_SPEED = 0.8  # rad/s when moving from the current pose to a gesture's first pose
+SPLINE_PEAK = 1.5  # peak speed of a spline segment relative to its average speed
 
 
 def _check_bounds(keyframes):
@@ -104,10 +105,24 @@ def sample_times(keyframes, hz=COMMAND_HZ):
         t += dt
 
 
+def fit_to_speed(keyframes, max_speed):
+    """Stretch every segment a joint could not follow at max_speed (rad/s).
+
+    The poses are untouched, so the gesture keeps its full reach and only its
+    tempo drops; without this a real servo cuts the corners of a fast move.
+    """
+    out = [keyframes[0]]
+    for (_, a), (dur, b) in zip(keyframes, keyframes[1:]):
+        needed = SPLINE_PEAK * max(abs(x - y) for x, y in zip(a, b)) / max_speed
+        out.append((max(dur, needed), b))
+    return out
+
+
 class GesturePlayer:
     """Plays queued gestures in real time; call update() once per frame."""
 
     def __init__(self):
+        self.max_speed = None  # rad/s; set to slow gestures down to what a real arm can follow
         self._queue = deque()
         self._traj = None
         self._t0 = 0.0
@@ -119,7 +134,15 @@ class GesturePlayer:
 
     def enqueue(self, label, keyframes):
         _check_bounds(keyframes)
+        if self.max_speed:
+            keyframes = fit_to_speed(keyframes, self.max_speed)
         self._queue.append((label, keyframes))
+
+    def peek(self, lead):
+        """Pose `lead` seconds ahead of now in the gesture being played, or None when idle."""
+        if self._traj is None:
+            return None
+        return pose_at(self._traj, time.monotonic() - self._t0 + lead)
 
     def cancel(self):
         self._queue.clear()

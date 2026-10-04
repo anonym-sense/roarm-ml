@@ -59,6 +59,12 @@ button, input { font: inherit; color: inherit; }
 .chip.warn { color: var(--accent); border-color: #ff9a3d55; }
 
 .stage-actions { position: absolute; left: 16px; bottom: 16px; display: flex; gap: 8px; }
+.tip {
+  position: absolute; left: 0; right: 0; bottom: 20px; margin: 0; text-align: center;
+  color: var(--muted); font-size: 12px; pointer-events: none;
+}
+#view.grab { cursor: grab; }
+#view.grabbing { cursor: grabbing; }
 .notice {
   position: absolute; inset: 40% 10% auto; text-align: center; color: var(--muted);
 }
@@ -197,6 +203,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
   #app { grid-template-columns: 1fr; grid-template-rows: 42dvh minmax(0, 1fr); }
   #panel { border-left: 0; border-top: 1px solid var(--line); }
   .stage-actions { left: auto; right: 12px; bottom: 12px; }
+  .tip { text-align: left; left: 14px; right: 150px; bottom: 14px; }
   .tiles { grid-template-columns: repeat(3, 1fr); }
 }
 
