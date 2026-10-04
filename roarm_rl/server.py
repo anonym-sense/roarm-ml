@@ -3,7 +3,7 @@
     python -m roarm_rl.server                 # http://127.0.0.1:8000 on this machine
     python -m roarm_rl.server --lan           # also reachable from a phone on the same Wi-Fi
     python -m roarm_rl.server --lan --https   # needed for the phone's microphone
-    python -m roarm_rl.server --hw serial --port COM9
+    python -m roarm_rl.server --hw serial     # with the real arm on USB (port is found automatically)
 
 The simulator runs headless on one thread and is the only code that touches
 PyBullet. Browsers get the arm's link poses over a WebSocket about 30 times a
@@ -370,6 +370,19 @@ def create_app(robot, ears=None, access_code=None):
     return app
 
 
+def find_arm_port():
+    """Serial port of the arm's USB adapter (CP210x or CH34x), or None."""
+    try:
+        from serial.tools import list_ports
+    except ImportError:
+        return None
+    ports = list(list_ports.comports())
+    for port in ports:
+        if (port.vid, port.pid) in ((0x10C4, 0xEA60), (0x1A86, 0x7523), (0x1A86, 0x55D4)):
+            return port.device
+    return ports[0].device if len(ports) == 1 else None
+
+
 def lan_address():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
@@ -404,7 +417,8 @@ def main():
     ap.add_argument("--no-voice", action="store_true", help="do not load the speech model")
     ap.add_argument("--hw", choices=["none", "serial", "http"], default="none",
                     help="connect to a real RoArm-M2 over serial or WiFi/HTTP (default: none)")
-    ap.add_argument("--port", default="COM5", help="serial port, e.g. COM5 or /dev/ttyUSB0")
+    ap.add_argument("--port", default=None,
+                    help="serial port, e.g. COM5 or /dev/ttyUSB0 (default: find the arm's USB adapter)")
     ap.add_argument("--baudrate", type=int, default=115200)
     ap.add_argument("--host", default="192.168.4.1", help="RoArm IP address for --hw http")
     args = ap.parse_args()
@@ -414,7 +428,11 @@ def main():
         hardware = RoArmHardware()
         try:
             if args.hw == "serial":
-                hardware.connect_serial(args.port, args.baudrate)
+                port = args.port or find_arm_port()
+                if port is None:
+                    raise RoArmHardwareError("no USB serial adapter found; plug the arm in or pass --port")
+                hardware.connect_serial(port, args.baudrate)
+                print(f"[hardware] connected on {port}; turn on Mirror in the Control tab to move it")
             else:
                 hardware.connect_http(args.host)
         except RoArmHardwareError as e:

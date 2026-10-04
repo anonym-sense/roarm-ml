@@ -70,7 +70,7 @@ and `stable-baselines3` only for training.
 python -m roarm_rl.server                  # open http://127.0.0.1:8000
 python -m roarm_rl.server --lan            # also from a phone on the same Wi-Fi
 python -m roarm_rl.server --lan --https    # needed for the phone's microphone
-python -m roarm_rl.server --hw serial --port COM5
+python -m roarm_rl.server --hw serial          # with the real arm on USB
 ```
 
 One page, laid out for a desktop or a phone:
@@ -82,6 +82,11 @@ One page, laid out for a desktop or a phone:
 - **Gestures**: every motion as a card; pick speed, size and side, tap to play.
 - **Learning**: what the arm has picked up (see below).
 - **Control**: joint sliders, and the switch that mirrors to the real arm.
+
+The real arm only moves when the server was started with `--hw serial` (the
+USB port is found automatically, or pass `--port`) or `--hw http`, **and** the
+Mirror switch in the Control tab is on. Without `--hw` the page drives the
+simulation only.
 
 Every open browser sees the same arm and the same conversation.
 
