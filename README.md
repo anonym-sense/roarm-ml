@@ -1,8 +1,15 @@
 # roarm-ml
 
 Simulation, control and reinforcement learning for the
-[Waveshare RoArm-M2](https://www.waveshare.com/wiki/RoArm-M2-S), a 4-DOF desktop
-robot arm.
+[Waveshare RoArm-M2](https://www.waveshare.com/roarm-m2-s.htm), a 4-DOF desktop
+robot arm ([product page](https://www.waveshare.com/roarm-m2-s.htm),
+[wiki](https://www.waveshare.com/wiki/RoArm-M2-S)).
+
+![The RoArm-M2 model in the PyBullet simulator](docs/roarm_m2_sim.png)
+
+*The arm as rendered by this project's simulator, using Waveshare's
+[official robot model](https://github.com/waveshareteam/roarm_ws). For photos
+of the physical arm, see the product page.*
 
 The idea: one PyBullet model of the arm that you can drive by hand, mirror
 onto the real robot, and train an RL policy against, all through the same
@@ -113,20 +120,13 @@ Training runs headless with PPO and writes checkpoints to
   reaches commanded targets.
 - IK (`RoArmSim.solve_ik`) converges to sub-millimetre accuracy against the
   `hand_tcp` frame on the targets tried so far.
+- Tested on a physical RoArm-M2: mirroring from the GUI and gesture playback
+  drive the real arm.
 - **The reach policy does not work yet.** A 1M-step PPO run with the default
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
 - Not built yet: replaying a trained policy on the real arm.
-
-## Automatic push
-
-This repository pushes to GitHub after every commit through a git hook. To
-enable it in a fresh clone:
-
-```
-git config core.hooksPath .githooks
-```
 
 ## License
 
