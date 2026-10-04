@@ -5,6 +5,14 @@ __pycache__/
 # Training output (checkpoints, logs) -- regenerate with roarm_rl.train
 runs/
 
+# Secrets: never commit these (see .githooks/pre-commit)
+.env
+.env.*
+*.pem
+*.key
+*.tmp
+*.local.json
+
 # PyBullet profiler dumps
 timings_*.json
 
@@ -14,5 +22,3 @@ timings_*.json
 Thumbs.db
 desktop.ini
 .DS_Store
-
-*.local.json

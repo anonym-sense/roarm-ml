@@ -23,6 +23,7 @@ import json
 import math
 import os
 import re
+import time
 from dataclasses import dataclass
 from typing import Callable, Optional
 
@@ -499,6 +500,13 @@ def _write_learned(data):
         text = re.sub(r"\[\s+(-?[\d.]+(?:,\s+-?[\d.]+)*)\s+\]",
                       lambda m: "[" + " ".join(m.group(1).split()) + "]", text)
         f.write(text + "\n")
+    # A sync client or editor can hold the file for a moment on Windows.
+    for attempt in range(10):
+        try:
+            os.replace(tmp, LEARNED_PATH)
+            return
+        except PermissionError:
+            time.sleep(0.2)
     os.replace(tmp, LEARNED_PATH)
 
 
