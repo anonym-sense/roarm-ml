@@ -1,0 +1,10 @@
+pybullet>=3.2.5
+numpy>=1.24
+
+# RL: only needed for roarm_rl.env / roarm_rl.train
+gymnasium>=1.0
+stable-baselines3>=2.3
+
+# Optional: only needed for --hw serial / --hw http (real RoArm-M2 mirroring)
+roarm-sdk>=0.1.1
+pyserial>=3.5

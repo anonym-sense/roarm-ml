@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+
+# Training output (checkpoints, logs) -- regenerate with roarm_rl.train
+runs/
+
+# PyBullet profiler dumps
+timings_*.json
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+.DS_Store
