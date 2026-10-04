@@ -53,6 +53,26 @@ MANUAL_SPEED = 1.5  # rad/s when following the sliders
 REACH_SPEED = 3.0  # rad/s when the hand is dragged in the 3D view
 MIN_REACH_HEIGHT = 0.04  # m; a dragged target is kept this far above the table
 HANDOVER_SPEED = 0.9  # rad/s while reaching toward a person's hand
+HANDOVER_EASE_S = 0.4  # seconds to ease into and out of each hand-over move
+GRIPPER_EASE_S = 0.25
+
+
+def ease_toward(x, target, velocity, ease_s, max_speed, dt):
+    """One step of a critically damped spring: starts and stops gently, never overshoots.
+
+    Returns the new position and velocity.
+    """
+    omega = 2.0 / ease_s
+    k = omega * dt
+    decay = 1.0 / (1.0 + k + 0.48 * k * k + 0.235 * k * k * k)
+    change = max(-max_speed * ease_s, min(max_speed * ease_s, x - target))
+    aim = x - change
+    push = (velocity + omega * change) * dt
+    velocity = (velocity - omega * push) * decay
+    new = aim + (change + push) * decay
+    if (target - x > 0) == (new > target):  # would pass the target: land on it
+        return target, 0.0
+    return new, velocity
 
 HANDOVER_PHRASES = [
     ("give", re.compile(r"\b(give (it|that|this) (back|to me)|hand (it|that) (back|over|to me)|"
@@ -104,6 +124,7 @@ class Robot:
         self._lock = threading.RLock()
         self._goal = None
         self._goal_speed = MANUAL_SPEED
+        self._eased = False  # True while a hand-over is steering: moves ease in and out
         self._reach = None
         self._home = False
         self._stop = threading.Event()
@@ -173,11 +194,13 @@ class Robot:
         with self._lock:
             self.player.cancel()
             self._goal, self._goal_speed = [float(v) for v in q[:4]], MANUAL_SPEED
+            self._eased = False
 
     def reach(self, xyz):
         """Move the hand toward a point (metres, simulator frame); solved on the simulator thread."""
         with self._lock:
             self.player.cancel()
+            self._eased = False
             self._reach = [float(xyz[0]), float(xyz[1]), max(MIN_REACH_HEIGHT, float(xyz[2]))]
 
     def set_mirror(self, on):
@@ -202,6 +225,7 @@ class Robot:
         q = list(sim.home_radians)
         last_sent, last_sent_at, gentle_until = None, 0.0, 0.0
         tcp = list(sim.get_ee_pose()[0])
+        velocity = [0.0] * 4
         dt = 1.0 / TICK_HZ
         next_tick = time.monotonic()
         try:
@@ -238,7 +262,7 @@ class Robot:
                             q = measured
                     if self._home:
                         self._home, self._goal = False, list(sim.home_radians)
-                        self._goal_speed = MANUAL_SPEED
+                        self._goal_speed, self._eased = MANUAL_SPEED, False
                     if self._reach is not None and self.torque:
                         target, self._reach = self._reach, None
                         solved = sim.solve_ik(target)[:3] + [q[3]]  # the gripper keeps its opening
@@ -260,13 +284,20 @@ class Robot:
                             goal[:3] = solved
                         if command.gripper is not None:
                             goal[3] = command.gripper
-                        self._goal, self._goal_speed = goal, HANDOVER_SPEED
+                        self._goal, self._goal_speed, self._eased = goal, HANDOVER_SPEED, True
                     pose = self.player.update(q)
                     if pose is not None:
                         q, self._goal = pose, None
+                    elif self._goal is not None and self._eased:
+                        moved = [ease_toward(a, b, v, GRIPPER_EASE_S if j == 3 else HANDOVER_EASE_S,
+                                             2.0 if j == 3 else self._goal_speed, dt)
+                                 for j, (a, b, v) in enumerate(zip(q, self._goal, velocity))]
+                        q, velocity = [m[0] for m in moved], [m[1] for m in moved]
                     elif self._goal is not None:
                         step = self._goal_speed * dt
                         q = [a + max(-step, min(step, b - a)) for a, b in zip(q, self._goal)]
+                    if not (self._eased and self._goal is not None and pose is None):
+                        velocity = [0.0] * 4
                     label = self.player.label
                     inventing = self.composer is not None and self.composer.busy
 

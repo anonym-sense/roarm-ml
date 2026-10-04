@@ -39,19 +39,25 @@ DEFAULT_MAP = [[0.0, 0.0, -1.0, 0.75], [1.0, 0.0, 0.0, 0.0], [0.0, -1.0, 0.0, 0.
 
 OPEN, CLOSED = 1.0, 0.0  # gripper radians
 REST = [0.0, 0.0, 1.5708]
-CAL_POSES = [  # [base, shoulder, elbow]; spread out so the fit is well conditioned
-    [0.0, 0.0, 1.5708], [0.55, 0.1, 1.75], [-0.55, 0.1, 1.75],
-    [0.0, -0.35, 1.2], [0.35, 0.4, 1.95], [-0.35, -0.25, 1.4],
+# [base, shoulder, elbow] for the calibration stops. The hand visits the corners
+# of a box about 14 cm deep, 12 cm wide and 14 cm tall in front of the arm:
+# small enough to stay in the camera's view, and deliberately varied in depth
+# (toward the camera), which is the axis the fit most needs.
+CAL_POSES = [
+    [0.255, -0.305, 1.861], [-0.255, -0.188, 2.1], [0.161, 0.358, 1.55],
+    [-0.161, 0.284, 1.215], [0.0, 0.089, 1.95], [0.0, -0.042, 1.566],
 ]
 
 FRESH_S = 0.5  # a hand report older than this is not trusted
 LOST_HOLD_S, LOST_ABORT_S = 1.5, 6.0
 STEADY_S, STEADY_M = 0.6, 0.025  # the hand must stay within this for this long
-ARRIVE_M = 0.03
+ARRIVE_M = 0.02
 PALM_OPEN_M = 0.06  # thumb-to-index gap that counts as an open hand
 PINCH_M = 0.05
 ABOVE_PALM_M = 0.06
 FOLLOW_GAP_M = 0.09
+AIM_DEADBAND_M = 0.006  # ignore hand jitter smaller than this
+AIM_EASE = 0.08  # share of the remaining distance the aim point moves per tick
 MAX_REACH_ERROR_M = 0.035
 
 
@@ -106,6 +112,7 @@ class HandOver:
         self._told = None
         self._capture = False
         self._pairs = []
+        self._aimed = None
         self.map, self.cal_error = DEFAULT_MAP, None
         try:
             with open(CAL_PATH, encoding="utf-8") as f:
@@ -163,6 +170,15 @@ class HandOver:
 
     def _go(self, step, now):
         self.step, self._since = step, now
+        self._aimed = None
+
+    def _aim(self, target):
+        """A steadied copy of a moving target, so the arm glides instead of chasing jitter."""
+        if self._aimed is None:
+            self._aimed = list(target)
+        elif math.dist(self._aimed, target) > AIM_DEADBAND_M:
+            self._aimed = [a + AIM_EASE * (b - a) for a, b in zip(self._aimed, target)]
+        return self._aimed
 
     def start(self, mode):
         now = time.monotonic()
@@ -228,7 +244,7 @@ class HandOver:
             pinch = self._hand["pinch"]
             reach = math.hypot(pinch[0], pinch[1]) or 1.0
             back = max(0.0, reach - FOLLOW_GAP_M) / reach  # stop short, on the arm's side of the hand
-            return Command(xyz=[pinch[0] * back, pinch[1] * back, pinch[2]])
+            return Command(xyz=self._aim([pinch[0] * back, pinch[1] * back, pinch[2]]))
 
         if self.mode == "take":
             return self._take(now, tcp, q)
@@ -249,7 +265,8 @@ class HandOver:
                 self._tell("That's out of my reach. Bring it a bit closer.")
             elif self._arrived(tcp, target) and self._steady(now, 0.4):
                 self._go("grip", now)
-            return Command(xyz=target, gripper=OPEN)
+                return Command(gripper=OPEN)
+            return Command(xyz=self._aim(target), gripper=OPEN)
         if self.step == "grip":
             if now - self._since > 0.9:
                 self.holding = True
@@ -273,7 +290,8 @@ class HandOver:
                 self._tell("Your hand is out of my reach. Bring it a bit closer.")
             elif self._arrived(tcp, target) and self._steady(now, 0.4):
                 self._go("release", now)
-            return Command(xyz=target, gripper=CLOSED)
+                return Command(gripper=CLOSED)
+            return Command(xyz=self._aim(target), gripper=CLOSED)
         if self.step == "release":
             if now - self._since > 0.9:
                 self.holding = False

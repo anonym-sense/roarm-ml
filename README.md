@@ -137,6 +137,10 @@ where the arm thinks your hand is.
 - **Give it back** (or say `give it back`): hold out an open hand. The arm
   moves above your palm, opens, and backs away.
 - **Follow my hand**: the arm hovers a few centimetres short of your hand.
+
+Hand-over moves ease in and out (a critically damped spring on each joint)
+and aim at a steadied copy of your hand's position, so the arm glides
+rather than chasing camera jitter.
 - `stop`, the Stop button, or taking your hand out of view for six seconds
   ends it.
 
@@ -145,8 +149,11 @@ proportions with its size in the picture, so expect errors of a few
 centimetres. **Calibrate** before using the real arm: the arm goes to six
 positions and at each one you pinch its gripper tip; that pairs camera
 readings with known arm positions and fits where the camera is (rotation,
-scale, shift and a depth correction). In simulation with 1 cm of noise on
-each pinch the fit was accurate to about 1.5 cm on average, 3.3 cm at worst.
+scale, shift and a depth correction). The six positions sit in a box about
+14 cm deep, 12 cm wide and 14 cm tall in front of the arm, so they stay in
+the camera's view. In simulation with 1 cm of noise on each pinch, the fit
+was off by 1.4 cm on average across the hand-over area, under 2.6 cm 95% of
+the time, 5.1 cm at worst.
 Recalibrate whenever the camera or the arm is moved. The calibration is
 saved in `data/`.
 
