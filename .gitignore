@@ -13,6 +13,10 @@ runs/
 *.tmp
 *.local.json
 
+# What was said to the arm, and the HTTPS certificate
+data/
+certs/
+
 # PyBullet profiler dumps
 timings_*.json
 

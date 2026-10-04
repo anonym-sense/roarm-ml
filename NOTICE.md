@@ -31,5 +31,10 @@ It is not bundled with this repository; you install it yourself only if you
 want to drive a real arm. If you distribute something that combines this code
 with `roarm-sdk`, the AGPL's terms apply to that combination.
 
+## Loaded by the web app
+
+The browser page loads [three.js](https://threejs.org) (MIT) from the
+jsDelivr CDN. It is not bundled with this repository.
+
 "RoArm" and "Waveshare" are names of Waveshare Electronics. This project is
 not affiliated with or endorsed by Waveshare.

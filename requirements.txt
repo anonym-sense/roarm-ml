@@ -5,7 +5,11 @@ numpy>=1.24
 gymnasium>=1.0
 stable-baselines3>=2.3
 
-# Voice input in the GUI (optional; without them the chat box still works)
+# Web app (roarm_rl.server)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+
+# Voice input (optional; without them the chat box still works)
 sounddevice>=0.4
 faster-whisper>=1.0
 

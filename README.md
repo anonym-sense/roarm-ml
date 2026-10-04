@@ -26,7 +26,10 @@ joint vector so nothing needs translating between sim and hardware.
 | `roarm_rl/gesture.py` | Plays keyframe gestures on a Catmull-Rom spline, in sim or on the arm |
 | `roarm_rl/library.py` | 66 hand-designed motions with speed, size and side variants |
 | `roarm_rl/intent.py` | Maps a line of chat text to gestures (offline keyword matching) |
-| `roarm_rl/chat.py` | The chat window |
+| `roarm_rl/server.py` | Web app server: streams the arm to browsers, takes commands |
+| `roarm_rl/web/` | The web page: 3D view, chat, voice, gestures, learning |
+| `roarm_rl/brain.py` | Learns preferences, skills and corrections from use |
+| `roarm_rl/chat.py` | The desktop chat window |
 | `roarm_rl/voice.py` | Microphone to text, offline (faster-whisper) |
 | `roarm_rl/composer.py` | Invents a gesture for an unknown phrase via an external language model |
 | `gestures/learned.json` | Gestures invented so far |
@@ -61,7 +64,67 @@ Python 3.11.
 `roarm-sdk` and `pyserial` are only needed to drive a real arm; `gymnasium`
 and `stable-baselines3` only for training.
 
-## Interactive GUI
+## Web app
+
+```
+python -m roarm_rl.server                  # open http://127.0.0.1:8000
+python -m roarm_rl.server --lan            # also from a phone on the same Wi-Fi
+python -m roarm_rl.server --lan --https    # needed for the phone's microphone
+python -m roarm_rl.server --hw serial --port COM5
+```
+
+One page, laid out for a desktop or a phone:
+
+- **3D view** of the arm, drawn in the browser with three.js from the poses
+  the server streams. Drag to orbit, pinch or scroll to zoom.
+- **Chat**: type or tap the microphone and speak. Each reply has *Good* and
+  *Not like that* buttons.
+- **Gestures**: every motion as a card; pick speed, size and side, tap to play.
+- **Learning**: what the arm has picked up (see below).
+- **Control**: joint sliders, and the switch that mirrors to the real arm.
+
+Every open browser sees the same arm and the same conversation.
+
+The page records speech in the browser and the server transcribes it with
+faster-whisper, so nothing depends on the PC's own microphone. Browsers only
+allow the microphone on a secure page: `127.0.0.1` counts, a phone needs
+`--https`. That flag creates a self-signed certificate with `openssl` in
+`certs/` (git-ignored), and the phone shows a warning once.
+
+With `--lan` the server prints a link containing an access code. Devices
+without it are refused, because anyone who can reach the page can move the
+arm. Keep the link to yourself and only use `--lan` on a network you trust.
+
+The page loads three.js from a CDN, so the device needs internet access the
+first time.
+
+### What it learns from use
+
+`roarm_rl/brain.py` learns from ordinary operation, with no training runs:
+
+- **Preferences.** *Good* / *Not like that*, and a `stop` in the middle of a
+  gesture, are rewards for the speed and size that was played. When you don't
+  say how fast or how big, it plays the best-rated variant for that motion
+  and, one time in ten, tries a neighbouring one to see if you like it better
+  (a multi-armed bandit).
+- **Skills.** `learn greeting: wave, then bow`, or after any command
+  `remember that as greeting`. Saying `greeting` then runs it. `forget
+  greeting` removes it.
+- **Corrections.** `no, I meant wave` plays a wave and remembers that the
+  previous phrase means wave.
+- **New gestures**, through the optional designer command described below.
+
+The Learning tab shows the counts, a 14-day activity chart, which speeds and
+sizes have been liked, the skills, and recent lessons.
+
+Skills, corrections and invented gestures are saved in
+`gestures/learned.json`. The log of what was said and the preference counts
+are in `data/`, which is git-ignored.
+
+This is learning about *what you want*, not motor learning: the motions
+themselves are still keyframes, and nothing here trains a neural network.
+
+## Desktop GUI
 
 ```
 python -m roarm_rl.main                              # sim only
@@ -207,13 +270,17 @@ Training runs headless with PPO and writes checkpoints to
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
+- The web app was tested in the simulator from a desktop browser, including
+  speech sent as a recorded file. It has not been tried on a physical phone,
+  with a live microphone, or with the real arm attached.
 - The chat window, gesture library and gesture inventor have been run in the
   simulator only. The wider motion range and the library gestures have not
   been played on the physical arm yet; try a `small` variant first.
 - Voice input was tested on synthesized speech fed through the same
   segmenting and transcription code, not yet on a live microphone.
-- Not built yet: replaying a trained policy on the real arm, and gestures
-  learned by RL rather than written by hand or by the composer.
+- Not built yet: replaying a trained policy on the real arm, and motions
+  learned by RL rather than written by hand or by the composer. The only
+  reinforcement learning in daily use is the preference bandit above.
 
 ## License
 

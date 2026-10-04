@@ -180,6 +180,10 @@ class Gesture:
     label: str  # e.g. "nod (fast, x3)"
     name: str  # library variant name
     keyframes: list
+    motion: str = ""  # library motion, e.g. "nod"
+    speed: str = "normal"
+    size: str = "normal"
+    chosen: bool = False  # True when speed/size were picked by the chooser, not the words
 
 
 @dataclass
@@ -247,7 +251,8 @@ def _match_motion(tokens):
 
 
 def _modifiers(tokens):
-    mods = {"speed": "normal", "size": "normal", "side": None, "vertical": None, "reps": None}
+    # speed / size stay None unless the words asked for one, so a caller can choose
+    mods = {"speed": None, "size": None, "side": None, "vertical": None, "reps": None}
     for i, tok in enumerate(tokens):
         for speed, words in SPEED_WORDS.items():
             if tok in words:
@@ -278,7 +283,7 @@ def _resolve(name, mods):
 
 
 def _label(name, mods, side):
-    notes = [m for m in (mods["speed"], mods["size"]) if m != "normal"]
+    notes = [m for m in (mods["speed"], mods["size"]) if m not in (None, "normal")]
     if MOTIONS[name].sided:
         notes.insert(0, side)
     if mods["reps"]:
@@ -296,8 +301,30 @@ def help_text():
     )
 
 
-def interpret(text):
-    """Chat text -> Result(reply, gestures to play in order, abort flag)."""
+def _make(name, mods, chooser=None):
+    """Build the Gesture for a motion; `chooser` fills in a speed/size the words left open."""
+    name = _resolve(name, mods)
+    side = mods["side"] or "left"
+    speed, size = mods["speed"], mods["size"]
+    chosen = False
+    if chooser is not None and (speed is None or size is None):
+        speed, size = chooser(name, speed, size)
+        chosen = True
+    mods = dict(mods, speed=speed or "normal", size=size or "normal")
+    return Gesture(
+        label=_label(name, mods, side),
+        name=variant_name(name, mods["speed"], mods["size"], side),
+        keyframes=build(name, mods["speed"], mods["size"], side, mods["reps"]),
+        motion=name, speed=mods["speed"], size=mods["size"], chosen=chosen,
+    )
+
+
+def interpret(text, chooser=None):
+    """Chat text -> Result(reply, gestures to play in order, abort flag).
+
+    chooser(motion, speed, size) -> (speed, size) is asked whenever the words
+    did not fix both; roarm_rl.brain uses it to apply learned preferences.
+    """
     cleaned = " ".join(re.findall(r"[a-z0-9]+", text.lower().replace("'", "")))
     if not cleaned:
         return Result("Tell me what to do, or type 'help'.")
@@ -311,9 +338,7 @@ def interpret(text):
     for phrase, name in _LEARNED_PHRASES:
         n = len(phrase)
         if any(tuple(words[i:i + n]) == phrase for i in range(len(words) - n + 1)):
-            mods = _modifiers(_tokens(text))
-            g = Gesture(_label(name, mods, "left"), variant_name(name, mods["speed"], mods["size"]),
-                        build(name, mods["speed"], mods["size"], reps=mods["reps"]))
+            g = _make(name, _modifiers(_tokens(text)), chooser)
             return Result(g.label, [g])
 
     lowered = text.lower()
@@ -349,17 +374,8 @@ def interpret(text):
             continue
         picked.append([name, mods])
 
-    def make(name, mods):
-        name = _resolve(name, mods)
-        side = mods["side"] or "left"
-        return Gesture(
-            label=_label(name, mods, side),
-            name=variant_name(name, mods["speed"], mods["size"], side),
-            keyframes=build(name, mods["speed"], mods["size"], side, mods["reps"]),
-        )
-
-    gestures = [make(name, mods) for name, mods in picked]
-    guesses = {clause: make(name, mods) for clause, (name, mods) in weak_picks.items()}
+    gestures = [_make(name, mods, chooser) for name, mods in picked]
+    guesses = {clause: _make(name, mods, chooser) for clause, (name, mods) in weak_picks.items()}
 
     if not gestures:
         return Result("I don't know a gesture for that yet. Type 'help' to see what I can do.",

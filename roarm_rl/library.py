@@ -450,8 +450,8 @@ MOTIONS = {
 
 # --- Learned motions: added at run time, stored in gestures/learned.json --------
 
-LEARNED_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                            "gestures", "learned.json")
+LEARNED_PATH = os.environ.get("ROARM_LEARNED_PATH") or os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "gestures", "learned.json")
 LEARNED_KEYWORDS = {}  # motion name -> trigger phrases, read by roarm_rl.intent
 MAX_KEYFRAMES = 60
 MAX_SECONDS = 15.0
