@@ -11,10 +11,12 @@ carry the animation principles:
 
     python -m roarm_rl.gesture dance             # preview in the simulator only
     python -m roarm_rl.gesture dance --hardware COM9   # run on the real arm over USB
+    python -m roarm_rl.gesture --list            # every name, including roarm_rl.library variants
 """
 
 import argparse
 import time
+from collections import deque
 
 GESTURES = {
     # Disney-style hop-and-wiggle: anticipation dip, springy overshoot, gripper follow-through.
@@ -44,6 +46,7 @@ GESTURES = {
 # Firmware limits intersected with URDF limits (see roarm_rl.sim._FIRMWARE_LIMITS_M2).
 SAFE_BOUNDS = [(-0.6, 0.6), (-0.3, 0.4), (1.0, 2.2), (0.0, 0.8)]
 COMMAND_HZ = 25
+LEAD_IN_SPEED = 0.8  # rad/s when moving from the current pose to a gesture's first pose
 
 
 def _check_bounds(keyframes):
@@ -62,38 +65,99 @@ def _catmull_rom(p0, p1, p2, p3, s):
     ]
 
 
+def duration(keyframes):
+    """Total play time in seconds (the first keyframe's duration is unused)."""
+    return sum(dur for dur, _ in keyframes[1:])
+
+
+def pose_at(keyframes, t):
+    """Pose at time t on a Catmull-Rom spline through the keyframes."""
+    poses = [kf[1] for kf in keyframes]
+    if len(poses) == 1:
+        return [min(max(v, lo), hi) for v, (lo, hi) in zip(poses[0], SAFE_BOUNDS)]
+    start = 0.0
+    i = 1  # poses index of segment end point
+    for i, (dur, _) in enumerate(keyframes[1:], start=1):
+        if t <= start + dur or i == len(poses) - 1:
+            break
+        start += dur
+    dur = keyframes[i][0]
+    s = min(max((t - start) / dur, 0.0), 1.0) if dur > 0 else 1.0
+    p0 = poses[max(i - 2, 0)]
+    p1 = poses[i - 1]
+    p2 = poses[i]
+    p3 = poses[min(i + 1, len(poses) - 1)]
+    pose = _catmull_rom(p0, p1, p2, p3, s)
+    return [min(max(v, lo), hi) for v, (lo, hi) in zip(pose, SAFE_BOUNDS)]
+
+
 def sample_times(keyframes, hz=COMMAND_HZ):
     """Yield (t, pose) at hz along a Catmull-Rom spline through the keyframes."""
-    poses = [kf[1] for kf in keyframes]
-    seg_times = []
-    t_acc = 0.0
-    for dur, _ in keyframes[1:]:
-        seg_times.append((t_acc, t_acc + dur))
-        t_acc += dur
-    total = t_acc
-
+    total = duration(keyframes)
     dt = 1.0 / hz
     t = 0.0
     while t <= total + 1e-9:
-        seg = len(seg_times) - 1
-        for i, (start, end) in enumerate(seg_times):
-            if t <= end:
-                seg = i
-                break
-        start, end = seg_times[seg]
-        s = min(max((t - start) / (end - start), 0.0), 1.0)
-        i = seg + 1  # poses index of segment end point
-        p0 = poses[max(i - 2, 0)]
-        p1 = poses[i - 1]
-        p2 = poses[i]
-        p3 = poses[min(i + 1, len(poses) - 1)]
-        pose = _catmull_rom(p0, p1, p2, p3, s)
-        yield t, [min(max(v, lo), hi) for v, (lo, hi) in zip(pose, SAFE_BOUNDS)]
+        yield t, pose_at(keyframes, t)
         t += dt
 
 
+class GesturePlayer:
+    """Plays queued gestures in real time; call update() once per frame."""
+
+    def __init__(self):
+        self._queue = deque()
+        self._traj = None
+        self._t0 = 0.0
+        self.label = None  # what is playing now, or None when idle
+
+    @property
+    def busy(self):
+        return self._traj is not None or bool(self._queue)
+
+    def enqueue(self, label, keyframes):
+        _check_bounds(keyframes)
+        self._queue.append((label, keyframes))
+
+    def cancel(self):
+        self._queue.clear()
+        self._traj = None
+        self.label = None
+
+    def update(self, current):
+        """Pose to command this frame, or None when nothing is playing."""
+        now = time.monotonic()
+        if self._traj is None:
+            if not self._queue:
+                return None
+            self.label, keyframes = self._queue.popleft()
+            first = keyframes[0][1]
+            gap = max(abs(a - b) for a, b in zip(current, first))
+            lead_in = max(0.05, gap / LEAD_IN_SPEED)
+            self._traj = [(0.0, list(current)), (lead_in, first)] + list(keyframes[1:])
+            self._t0 = now
+        t = now - self._t0
+        pose = pose_at(self._traj, t)
+        if t >= duration(self._traj):
+            self._traj = None
+            if not self._queue:
+                self.label = None
+        return pose
+
+
+def lookup(name):
+    """Keyframes for a hand-written gesture or any roarm_rl.library variant."""
+    if name in GESTURES:
+        return GESTURES[name]
+    from roarm_rl.library import catalog
+
+    variants = catalog()
+    if name not in variants:
+        raise KeyError(f"unknown gesture '{name}' (try --list)")
+    return variants[name]
+
+
 def preview(name):
-    kf = GESTURES[name]
+    kf = lookup(name)
     _check_bounds(kf)
     from roarm_rl.sim import RoArmSim
 
@@ -109,7 +173,7 @@ def preview(name):
 
 
 def play_on_hardware(name, port, speed=600, acc=40):
-    kf = GESTURES[name]
+    kf = lookup(name)
     _check_bounds(kf)
     from roarm_sdk.roarm import roarm
 
@@ -143,11 +207,24 @@ def play_on_hardware(name, port, speed=600, acc=40):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("name", choices=sorted(GESTURES))
+    ap.add_argument("name", nargs="?", help="gesture name, e.g. dance or nod_fast_big")
+    ap.add_argument("--list", action="store_true", help="print every gesture name and exit")
     ap.add_argument("--hardware", metavar="PORT", default=None,
                     help="serial port of the real arm (e.g. COM9). Omit to preview in sim only.")
     ap.add_argument("--speed", type=int, default=600)
     args = ap.parse_args()
+
+    if args.list or not args.name:
+        from roarm_rl.library import catalog
+
+        names = sorted(set(GESTURES) | set(catalog()))
+        print("\n".join(names))
+        print(f"{len(names)} gestures")
+        return
+    try:
+        lookup(args.name)
+    except KeyError as e:
+        ap.error(e.args[0])
 
     if args.hardware:
         play_on_hardware(args.name, args.hardware, speed=args.speed)

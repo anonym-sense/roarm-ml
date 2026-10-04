@@ -20,10 +20,13 @@ joint vector so nothing needs translating between sim and hardware.
 | Module | What it does |
 | --- | --- |
 | `roarm_rl/sim.py` | `RoArmSim`: PyBullet wrapper with joint control, FK/IK and joint limits |
-| `roarm_rl/app.py` | Interactive 3D GUI: keyboard control plus click-and-drag on the arm |
+| `roarm_rl/app.py` | Interactive 3D GUI: keyboard control, click-and-drag on the arm, chat |
 | `roarm_rl/picking.py` | Mouse-ray math behind the click-and-drag |
 | `roarm_rl/hardware.py` | `RoArmHardware`: mirrors joint targets to a real arm via `roarm_sdk` |
-| `roarm_rl/gesture.py` | Keyframe gestures (`dance`, `wave`) on a Catmull-Rom spline |
+| `roarm_rl/gesture.py` | Plays keyframe gestures on a Catmull-Rom spline, in sim or on the arm |
+| `roarm_rl/library.py` | 66 hand-designed motions with speed, size and side variants |
+| `roarm_rl/intent.py` | Maps a line of chat text to gestures (offline keyword matching) |
+| `roarm_rl/chat.py` | The chat window |
 | `roarm_rl/env.py` | `RoArmReachEnv`: Gymnasium reach task |
 | `roarm_rl/train.py` | PPO training and evaluation (Stable-Baselines3) |
 | `roarm_rl/main.py` | CLI entry point for the GUI |
@@ -82,18 +85,55 @@ camera first to reach a different depth.
 Mirroring is off by default even when `--hw` connects. Once on, joint targets
 are throttled to about 12 Hz so the servo bus isn't flooded.
 
+## Chat
+
+The GUI opens a second window with a chat box. Type what the arm should do
+and press Enter; the reply shows which gestures were picked, and they play in
+the simulator (and on the real arm when mirroring is on).
+
+```
+hello
+nod twice then wave slowly
+point right
+thanks, that was great!
+look left and right
+small circle, fast
+stop
+```
+
+- Words like `slowly` / `fast`, `small` / `big`, `left` / `right` and counts
+  like `twice` or `3 times` choose the variant.
+- `then`, `and` or a comma chains gestures.
+- It also reacts to plain remarks: `good job` celebrates, `no way` acts
+  surprised, `good night` goes to sleep.
+- `help` lists every motion. `stop`, `H`, or grabbing the arm with the mouse
+  cancels what is playing.
+
+The matching is offline keyword lookup in `roarm_rl/intent.py`: each motion
+lists the words and phrases that trigger it, and the longest match wins. There
+is no language model behind it, so it only understands phrases close to those
+lists. Run with `--no-chat` to skip the window.
+
 ## Gestures
 
 ```
-python -m roarm_rl.gesture dance                   # preview in the simulator
-python -m roarm_rl.gesture wave --hardware COM9    # play on the real arm
+python -m roarm_rl.gesture --list                    # every gesture name
+python -m roarm_rl.gesture nod_fast_big              # preview in the simulator
+python -m roarm_rl.gesture wave --hardware COM9      # play on the real arm
 ```
+
+`roarm_rl/library.py` holds 66 hand-designed motions (nod, wave, bow, point,
+grab, celebrate, circle, ...). Each is written once in normalized units and
+generated at three speeds and three sizes, mirrored left/right where that
+makes sense, which gives 702 named variants such as `nod_slow_big` or
+`peek_right_fast`. They are variations of those 66 motions, not 702 separately
+designed ones, and none of them is learned.
 
 Gestures are lists of `(duration, pose)` keyframes joined by a Catmull-Rom
 spline, so velocity stays continuous through each pose. The keyframes use
 animation-style timing: anticipation before a big move, overshoot and settle,
-and the gripper trailing the wrist. Every pose is checked against a
-conservative safe range before anything is sent to the arm.
+and the gripper trailing the wrist. Every pose is kept inside a conservative
+safe range before anything is sent to the arm.
 
 ## Reinforcement learning
 
@@ -126,7 +166,10 @@ Training runs headless with PPO and writes checkpoints to
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
-- Not built yet: replaying a trained policy on the real arm.
+- The chat window and gesture library have been run in the simulator only;
+  the library gestures have not been played on the physical arm yet.
+- Not built yet: replaying a trained policy on the real arm, and gestures
+  learned by RL rather than written by hand.
 
 ## License
 

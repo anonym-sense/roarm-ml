@@ -17,6 +17,8 @@ P            toggle "Mirror to Real Robot"
 H            send HOME pose (sim + hardware if mirroring)
 T            toggle hardware torque
 ESC          quit
+Chat window: type what the arm should do ("nod twice then wave slowly").
+Grabbing the arm with the mouse, H, or typing "stop" cancels a gesture.
 Mouse: click+drag the arm itself to move the hand in 3D (switches to IK
 mode automatically). Drag happens in the plane facing the camera at the
 depth you grabbed -- orbit/zoom the camera first to reach a different
@@ -31,6 +33,8 @@ import time
 
 import pybullet as p
 
+from roarm_rl import intent
+from roarm_rl.gesture import GesturePlayer
 from roarm_rl.sim import RoArmSim
 from roarm_rl.picking import camera_ray, intersect_plane
 
@@ -99,8 +103,20 @@ class _MouseDrag:
             self.plane_normal = list(cam_fwd)
 
 
-def run(hardware=None):
+def _open_chat():
+    try:
+        from roarm_rl.chat import ChatWindow
+
+        return ChatWindow()
+    except Exception as e:  # no Tk on this Python, or no display
+        print(f"[chat] unavailable: {e}")
+        return None
+
+
+def run(hardware=None, chat=True):
     sim = RoArmSim(gui=True)
+    chat = _open_chat() if chat else None
+    player = GesturePlayer()
     limits = sim.joint_limits
 
     joints = list(sim.home_radians)
@@ -117,7 +133,8 @@ def run(hardware=None):
         "M: joint/IK mode   P: mirror on/off   H: home   T: torque   Esc: quit\n"
         "Joint mode:  <-/-> base   up/down shoulder   PgUp/PgDn elbow   ,/. gripper\n"
         "IK mode:     <-/-> X      up/down Y          PgUp/PgDn Z       ,/. gripper\n"
-        "Mouse: click+drag the arm to move the hand (drags on the plane you grabbed)"
+        "Mouse: click+drag the arm to move the hand (drags on the plane you grabbed)\n"
+        "Chat window: type what the arm should do"
     )
     p.addUserDebugText(legend, [-0.25, 0.0, 0.62], textColorRGB=[0.85, 0.9, 1.0], textSize=1.0)
     marker = sim.add_target_marker()
@@ -138,7 +155,18 @@ def run(hardware=None):
             if _tapped(keys, KEY_P):
                 mirroring = not mirroring
                 print(f"[mirror] {'ON' if mirroring else 'OFF'}")
+            if chat is not None:
+                for text in chat.poll():
+                    result = intent.interpret(text)
+                    if result.abort:
+                        player.cancel()
+                    for g in result.gestures:
+                        player.enqueue(g.label, g.keyframes)
+                    chat.say(result.reply)
+                    print(f"[chat] {text!r} -> {result.reply}")
+
             if _tapped(keys, KEY_H):
+                player.cancel()
                 joints = list(sim.home_radians)
                 ik_target = list(sim.get_ee_pose()[0])
                 print("[action] home")
@@ -160,6 +188,13 @@ def run(hardware=None):
 
             drag_target = drag.update(p.getMouseEvents(), sim.client_id)
             if drag_target is not None:
+                player.cancel()
+            gesture_pose = player.update(joints)
+            if gesture_pose is not None:
+                joints = gesture_pose
+                mode_ik = False
+                ik_target = list(sim.get_ee_pose()[0])
+            elif drag_target is not None:
                 if not mode_ik:
                     mode_ik = True
                     print("[mode] IK-XYZ (grabbed by mouse)")
@@ -193,10 +228,11 @@ def run(hardware=None):
                 if _held(keys, PGDN):
                     joints[2] -= JOINT_STEP
 
-            if _held(keys, PERIOD):
-                joints[3] += JOINT_STEP
-            if _held(keys, COMMA):
-                joints[3] -= JOINT_STEP
+            if gesture_pose is None:
+                if _held(keys, PERIOD):
+                    joints[3] += JOINT_STEP
+                if _held(keys, COMMA):
+                    joints[3] -= JOINT_STEP
 
             joints = sim.set_joint_targets(joints)
             sim.step()
@@ -209,7 +245,8 @@ def run(hardware=None):
                                                   physicsClientId=sim.client_id)
 
             status = (
-                f"{'IK-XYZ' if mode_ik else 'JOINT'} MODE    MIRROR {'ON ' if mirroring else 'OFF'}\n"
+                f"{'IK-XYZ' if mode_ik else 'JOINT'} MODE    MIRROR {'ON ' if mirroring else 'OFF'}"
+                f"{'    GESTURE: ' + player.label if player.label else ''}\n"
                 f"base {joints[0]:+.2f}   shoulder {joints[1]:+.2f}\n"
                 f"elbow {joints[2]:+.2f}   gripper {joints[3]:+.2f}"
             )
@@ -239,5 +276,7 @@ def run(hardware=None):
         pass  # GUI window closed
     finally:
         sim.close()
+        if chat is not None:
+            chat.close()
         if hardware is not None and hardware.connected:
             hardware.disconnect()

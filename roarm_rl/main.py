@@ -12,6 +12,7 @@ def parse_args():
     parser.add_argument("--port", default="COM5", help="serial port, e.g. COM5 (Windows) or /dev/ttyUSB0")
     parser.add_argument("--baudrate", type=int, default=115200)
     parser.add_argument("--host", default="192.168.4.1", help="RoArm IP address for --hw http")
+    parser.add_argument("--no-chat", action="store_true", help="do not open the chat window")
     return parser.parse_args()
 
 
@@ -30,7 +31,7 @@ def main():
             print(f"[hardware] {e}", file=sys.stderr)
             hardware = None
 
-    run(hardware=hardware)
+    run(hardware=hardware, chat=not args.no_chat)
 
 
 if __name__ == "__main__":
