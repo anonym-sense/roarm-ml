@@ -22,7 +22,9 @@ the box. If you redistribute them, check with Waveshare first.
 ## Optional runtime dependency: `roarm-sdk`
 
 The hardware paths (`--hw serial`, `--hw http`, `gesture --hardware`) import
-Waveshare's `roarm-sdk`, which is licensed under AGPL-3.0:
+Waveshare's `roarm-sdk`. Its source repository is licensed under AGPL-3.0,
+while the package metadata on PyPI says MIT; this project treats it as
+AGPL-3.0, the stricter of the two:
 https://github.com/waveshareteam/waveshare_roarm_sdk
 
 It is not bundled with this repository; you install it yourself only if you
