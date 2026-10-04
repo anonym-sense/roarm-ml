@@ -17,7 +17,9 @@ without the code are refused. Requests from this machine never need it.
 import argparse
 import asyncio
 import io
+import math
 import os
+import re
 import secrets
 import socket
 import subprocess
@@ -36,6 +38,7 @@ from roarm_rl import library
 from roarm_rl.brain import Brain
 from roarm_rl.composer import Composer, available as composer_available
 from roarm_rl.gesture import SAFE_BOUNDS, GesturePlayer
+from roarm_rl.handover import HandOver
 from roarm_rl.hardware import RoArmHardware, RoArmHardwareError
 from roarm_rl.sim import RoArmSim
 
@@ -49,6 +52,15 @@ TICK_HZ = 60
 MANUAL_SPEED = 1.5  # rad/s when following the sliders
 REACH_SPEED = 3.0  # rad/s when the hand is dragged in the 3D view
 MIN_REACH_HEIGHT = 0.04  # m; a dragged target is kept this far above the table
+HANDOVER_SPEED = 0.9  # rad/s while reaching toward a person's hand
+
+HANDOVER_PHRASES = [
+    ("give", re.compile(r"\b(give (it|that|this) (back|to me)|hand (it|that) (back|over|to me)|"
+                        r"give me (it|that)( back)?|put it in my hand|i want it back)\b")),
+    ("take", re.compile(r"\b(take (this|it|that)|grab (this|it|that)|hold (this|it|that)|"
+                        r"take .* from me|here take)\b")),
+    ("follow", re.compile(r"\bfollow (my hand|me)\b")),
+]
 MIRROR_MIN_INTERVAL = 0.04  # seconds; avoid flooding the servo bus
 MIRROR_EPSILON = 0.004  # radians; skip resend if target barely changed
 # Measured on a RoArm-M2 over USB: the arm starts moving about 0.2 s after a
@@ -86,6 +98,7 @@ class Robot:
         self.player = GesturePlayer()
         self.brain = Brain()
         self.composer = Composer() if composer_available() else None
+        self.handover = HandOver(say=lambda text: self.post("arm", text))
         self.messages = []  # chat history shared by every connected browser
         self.state = {}
         self._lock = threading.RLock()
@@ -119,6 +132,11 @@ class Robot:
         """Handle one line of chat or transcribed speech."""
         with self._lock:
             self.post("you", text, source=source)
+            for mode, pattern in HANDOVER_PHRASES:
+                if pattern.search(text.lower()):
+                    self.player.cancel()
+                    self.post("arm", self.handover.start(mode))
+                    return self.brain._event(text, f"hand-over: {mode}", kind="info")
             busy = self.composer is not None and self.composer.busy
             event = self.brain.handle(text, can_compose=self.composer is not None and not busy)
             if event.kind == "stop":
@@ -142,11 +160,13 @@ class Robot:
             if self.player.label:
                 self.brain.stopped(self.player.label)
             self.player.cancel()
+            self.handover.cancel()
             self._goal = None
 
     def home(self):
         with self._lock:
             self.player.cancel()
+            self.handover.cancel()
             self._home = True
 
     def set_joints(self, q):
@@ -181,6 +201,7 @@ class Robot:
         links = [j for j in range(p.getNumJoints(sim.robot, physicsClientId=sim.client_id))]
         q = list(sim.home_radians)
         last_sent, last_sent_at, gentle_until = None, 0.0, 0.0
+        tcp = list(sim.get_ee_pose()[0])
         dt = 1.0 / TICK_HZ
         next_tick = time.monotonic()
         try:
@@ -223,6 +244,23 @@ class Robot:
                         solved = sim.solve_ik(target)[:3] + [q[3]]  # the gripper keeps its opening
                         self._goal = [min(max(v, lo), hi) for v, (lo, hi) in zip(solved, SAFE_BOUNDS)]
                         self._goal_speed = min(REACH_SPEED, ARM_MAX_SPEED) if self.mirroring else REACH_SPEED
+                    command = self.handover.update(time.monotonic(), tcp, q) if self.torque else None
+                    if command is not None:
+                        self.player.cancel()
+                        goal = list(self._goal or q)
+                        if command.joints is not None:
+                            goal[:3] = command.joints
+                        elif command.xyz is not None:
+                            want = [command.xyz[0], command.xyz[1], max(MIN_REACH_HEIGHT, command.xyz[2])]
+                            solved = [min(max(v, lo), hi)
+                                      for v, (lo, hi) in zip(sim.solve_ik(want)[:3], SAFE_BOUNDS)]
+                            # how close can the hand actually get? (the pose is restored below)
+                            sim.set_joint_targets(solved + [q[3]], instant=True)
+                            self.handover.reach_error = math.dist(sim.get_ee_pose()[0], want)
+                            goal[:3] = solved
+                        if command.gripper is not None:
+                            goal[3] = command.gripper
+                        self._goal, self._goal_speed = goal, HANDOVER_SPEED
                     pose = self.player.update(q)
                     if pose is not None:
                         q, self._goal = pose, None
@@ -237,10 +275,12 @@ class Robot:
                 for j in links:
                     s = p.getLinkState(sim.robot, j, physicsClientId=sim.client_id)
                     poses.append([round(v, 5) for v in (*s[4], *s[5])])
+                tcp = poses[-1][:3]
                 self.state = {
                     "q": [round(v, 4) for v in q], "links": poses, "gesture": label,
                     "inventing": inventing, "mirror": self.mirroring, "torque": self.torque,
                     "hardware": self.hardware is not None and self.hardware.connected,
+                    "handover": self.handover.status(),
                 }
 
                 if self.mirroring:
@@ -387,6 +427,28 @@ def create_app(robot, ears=None, access_code=None):
         if not isinstance(xyz, list) or len(xyz) != 3:
             return JSONResponse({"error": "xyz must be three numbers"}, status_code=400)
         robot.reach(xyz)
+        return {"ok": True}
+
+    @app.post("/api/hand")
+    def hand(body: dict):
+        robot.handover.see(body)
+        return {"ok": True}
+
+    @app.post("/api/handover")
+    def handover(body: dict):
+        action = body.get("action")
+        if action in ("take", "give", "follow", "calibrate"):
+            with robot._lock:
+                robot.player.cancel()
+                robot.post("arm", robot.handover.start(action))
+        elif action == "capture":
+            robot.handover.capture_now()
+        elif action == "reset":
+            robot.handover.reset_calibration()
+        elif action == "stop":
+            robot.stop()
+        else:
+            return JSONResponse({"error": "unknown action"}, status_code=400)
         return {"ok": True}
 
     @app.post("/api/stop")

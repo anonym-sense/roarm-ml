@@ -34,7 +34,10 @@ with `roarm-sdk`, the AGPL's terms apply to that combination.
 ## Loaded by the web app
 
 The browser page loads [three.js](https://threejs.org) (MIT) from the
-jsDelivr CDN. It is not bundled with this repository.
+jsDelivr CDN and, when the camera is switched on,
+[MediaPipe Tasks Vision](https://ai.google.dev/edge/mediapipe) (Apache-2.0)
+from jsDelivr with its hand-landmark model from Google's model storage.
+None of these are bundled with this repository.
 
 "RoArm" and "Waveshare" are names of Waveshare Electronics. This project is
 not affiliated with or endorsed by Waveshare.

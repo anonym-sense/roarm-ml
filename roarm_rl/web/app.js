@@ -2,6 +2,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { STLLoader } from "three/addons/loaders/STLLoader.js";
+import { HandCamera } from "/static/hand.js";
 
 const $ = (id) => document.getElementById(id);
 const post = (url, body) =>
@@ -98,6 +99,10 @@ const ray = new THREE.Raycaster();
 const dragPlane = new THREE.Plane();
 let drag = null;
 let lastReach = 0;
+const handDot = new THREE.Mesh(new THREE.SphereGeometry(0.016, 20, 20),
+  new THREE.MeshBasicMaterial({ color: 0xff9a3d, transparent: true, opacity: 0.9 }));
+handDot.visible = false; // where the server thinks your hand is, in the arm's frame
+robot.add(handDot);
 const marker = new THREE.Mesh(new THREE.SphereGeometry(0.012, 20, 20),
   new THREE.MeshBasicMaterial({ color: 0x5cc8ff, transparent: true, opacity: 0.85 }));
 marker.visible = false;
@@ -225,6 +230,7 @@ function connect() {
         ? "Motors released: move the arm by hand and the 3D view follows it. Turn the motors back on before mirroring."
         : "The real arm is connected. Turn mirroring on to move it.";
     ears = state.ears;
+    showHandover(state.handover);
     (state.messages || []).forEach(addMessage);
     if (!draggingSlider && state.q) state.q.forEach((v, i) => setSlider(i, v));
   };
@@ -332,6 +338,83 @@ async function toggleMic() {
   watch();
 }
 $("mic").onclick = toggleMic;
+
+// ---------------------------------------------------------------- camera + hand-over
+const HANDOVER_TEXT = {
+  take: { wait: "waiting for a steady hand", approach: "reaching for it", grip: "gripping", retract: "bringing it back" },
+  give: { wait: "waiting for an open hand", approach: "bringing it to you", release: "letting go", retract: "backing away" },
+  follow: { wait: "following your hand" },
+};
+let facing = "user";
+let lastHandSent = 0;
+
+const camera3 = new HandCamera($("cam-video"), $("cam-overlay"), (hand) => {
+  $("cam-range").textContent = hand ? `${Math.round(hand.depth * 100)} cm away` : "no hand";
+  const now = performance.now();
+  if (now - lastHandSent < 66) return; // about 15 reports a second
+  lastHandSent = now;
+  post("/api/hand", hand ? { seen: true, pinch: hand.pinch, palm: hand.palm, open: hand.open } : { seen: false });
+}, (text) => { $("cam-status").textContent = text; });
+
+async function toggleCamera() {
+  if (camera3.running || camera3.stream) {
+    camera3.stop();
+    $("cam").hidden = true;
+    $("cam-toggle").textContent = "Start camera";
+    $("cam-status").textContent = "Camera off.";
+    return;
+  }
+  if (!navigator.mediaDevices || !window.isSecureContext) {
+    $("cam-status").textContent = "The camera needs a secure page. Start the server with --https and open the https link.";
+    return;
+  }
+  $("cam").hidden = false;
+  $("cam-toggle").textContent = "Stop camera";
+  try {
+    await camera3.start(facing);
+  } catch (e) {
+    camera3.stop();
+    $("cam").hidden = true;
+    $("cam-toggle").textContent = "Start camera";
+    $("cam-status").textContent = e.name === "NotAllowedError" ? "Camera permission was refused."
+      : `Could not start the camera or the hand tracker (${e.message || e.name}).`;
+  }
+}
+$("cam-toggle").onclick = toggleCamera;
+
+function facingButtons() {
+  $("seg-facing").replaceChildren(...[["user", "front"], ["environment", "back"]].map(([value, label]) => {
+    const b = el("button", { textContent: label, type: "button", className: facing === value ? "on" : "" });
+    b.onclick = async () => {
+      facing = value;
+      facingButtons();
+      if (camera3.stream) { camera3.stop(); await toggleCamera(); }
+    };
+    return b;
+  }));
+}
+facingButtons();
+
+document.querySelectorAll("[data-handover]").forEach((b) => {
+  b.onclick = () => post("/api/handover", { action: b.dataset.handover });
+});
+
+function showHandover(h) {
+  if (!h) return;
+  const busy = h.mode !== "idle";
+  const text = h.mode === "calibrate" ? `calibrating, position ${Math.min(6, (h.progress ?? 0) + 1)} of 6`
+    : HANDOVER_TEXT[h.mode]?.[h.step] ?? HANDOVER_TEXT[h.mode]?.wait ?? "";
+  $("chip-handover").hidden = !busy;
+  $("chip-handover").textContent = text;
+  $("handover-status").textContent = busy ? `Now: ${text}.`
+    : h.holding ? "Holding something. Say \"give it back\" or tap Give it back."
+    : h.camera ? "Ready. Say \"take this\" or tap Take from me." : "Start the camera to use these.";
+  $("cal-status").textContent = h.calibrated
+    ? `Calibrated. Typical error ${(h.error * 100).toFixed(1)} cm.`
+    : "Not calibrated: using a rough guess of where the camera is. Fine for trying it in the simulator, not for the real arm.";
+  handDot.visible = !!h.hand;
+  if (h.hand) handDot.position.set(h.hand[0], h.hand[1], h.hand[2]);
+}
 
 // ---------------------------------------------------------------- gestures
 const choice = { speed: "normal", size: "normal", side: "left" };

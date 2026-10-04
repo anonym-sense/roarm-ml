@@ -29,6 +29,7 @@ joint vector so nothing needs translating between sim and hardware.
 | `roarm_rl/server.py` | Web app server: streams the arm to browsers, takes commands |
 | `roarm_rl/web/` | The web page: 3D view, chat, voice, gestures, learning |
 | `roarm_rl/brain.py` | Learns preferences, skills and corrections from use |
+| `roarm_rl/handover.py` | Camera-guided take / give / follow, and camera calibration |
 | `roarm_rl/chat.py` | The desktop chat window |
 | `roarm_rl/voice.py` | Microphone to text, offline (faster-whisper) |
 | `roarm_rl/composer.py` | Invents a gesture for an unknown phrase via an external language model |
@@ -81,6 +82,8 @@ One page, laid out for a desktop or a phone:
 - **Chat**: type or tap the microphone and speak. Each reply has *Good* and
   *Not like that* buttons.
 - **Gestures**: every motion as a card; pick speed, size and side, tap to play.
+- **Camera**: a small live camera view with hand tracking, for handing
+  things to the arm and getting them back (see below).
 - **Learning**: what the arm has picked up (see below).
 - **Control**: joint sliders, and the switch that mirrors to the real arm.
 
@@ -117,6 +120,38 @@ arm. Keep the link to yourself and only use `--lan` on a network you trust.
 
 The page loads three.js from a CDN, so the device needs internet access the
 first time.
+
+### Handing things over (camera)
+
+The Camera tab turns on the device's camera and shows it in a corner of the
+3D view with the tracked hand drawn over it. The hand is tracked in the
+browser (MediaPipe); the video never leaves the device, only the hand's
+estimated position is sent to the server. An orange dot in the 3D view shows
+where the arm thinks your hand is.
+
+- **Take from me** (or say `take this`): hold the object out between thumb
+  and index finger and keep still. The arm opens its gripper, reaches the
+  point between those two fingertips, closes, and carries the object back.
+- **Give it back** (or say `give it back`): hold out an open hand. The arm
+  moves above your palm, opens, and backs away.
+- **Follow my hand**: the arm hovers a few centimetres short of your hand.
+- `stop`, the Stop button, or taking your hand out of view for six seconds
+  ends it.
+
+Distance comes from one ordinary camera, by comparing the hand's real
+proportions with its size in the picture, so expect errors of a few
+centimetres. **Calibrate** before using the real arm: the arm goes to six
+positions and at each one you pinch its gripper tip; that pairs camera
+readings with known arm positions and fits where the camera is (rotation,
+scale, shift and a depth correction). In simulation with 1 cm of noise on
+each pinch the fit was accurate to about 1.5 cm on average, 3.3 cm at worst.
+Recalibrate whenever the camera or the arm is moved. The calibration is
+saved in `data/`.
+
+What this does not do: it does not recognise objects, so it cannot pick
+something up off the table or know whether the grip succeeded. It assumes
+the object is at your fingertips. The arm has no wrist, so it can only
+approach from where it stands. Keep fingers clear of the closing gripper.
 
 ### What it learns from use
 
@@ -290,6 +325,10 @@ Training runs headless with PPO and writes checkpoints to
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
+- Hand-over was tested in the simulator only: the logic with a synthetic
+  hand, and the camera path in a headless browser whose camera showed a
+  photo of a hand. It has not been run with a live camera, a real hand-over,
+  or the real arm, and the calibration routine has never been done for real.
 - The web app was tested in the simulator from a desktop browser, including
   speech sent as a recorded file, and its mirroring was measured on a real
   RoArm-M2 over USB (joints land within about 0.01 rad of a commanded pose).

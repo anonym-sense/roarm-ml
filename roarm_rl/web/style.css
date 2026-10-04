@@ -59,6 +59,18 @@ button, input { font: inherit; color: inherit; }
 .chip.warn { color: var(--accent); border-color: #ff9a3d55; }
 
 .stage-actions { position: absolute; left: 16px; bottom: 16px; display: flex; gap: 8px; }
+#cam {
+  position: absolute; right: 16px; top: calc(54px + env(safe-area-inset-top, 0px));
+  width: min(240px, 34%); border-radius: 12px; overflow: hidden;
+  border: 1px solid #ffffff26; box-shadow: 0 8px 28px #0008; background: #000;
+}
+#cam video, #cam canvas { display: block; width: 100%; transform: scaleX(-1); } /* mirror, like a mirror */
+#cam canvas { position: absolute; inset: 0; height: 100%; }
+#cam span {
+  position: absolute; left: 8px; bottom: 6px; font-size: 12px; padding: 2px 7px;
+  border-radius: 999px; background: #000a; font-variant-numeric: tabular-nums;
+}
+.acts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tip {
   position: absolute; left: 0; right: 0; bottom: 20px; margin: 0; text-align: center;
   color: var(--muted); font-size: 12px; pointer-events: none;
@@ -79,12 +91,12 @@ button, input { font: inherit; color: inherit; }
 .pane.active { display: flex; }
 
 .tabs {
-  display: grid; grid-template-columns: repeat(4, 1fr);
+  display: grid; grid-template-columns: repeat(5, 1fr);
   border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .tabs button {
-  background: none; border: 0; padding: 13px 4px; color: var(--muted); cursor: pointer;
+  background: none; border: 0; padding: 13px 2px; font-size: 14px; color: var(--muted); cursor: pointer;
   border-top: 2px solid transparent; margin-top: -1px;
 }
 .tabs button.active { color: var(--text); border-top-color: var(--accent); }
