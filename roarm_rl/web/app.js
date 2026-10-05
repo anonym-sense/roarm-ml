@@ -421,6 +421,8 @@ function showHandover(h) {
     : HANDOVER_TEXT[h.mode]?.[h.step] ?? HANDOVER_TEXT[h.mode]?.wait ?? "";
   $("chip-handover").hidden = !busy;
   $("chip-handover").textContent = text;
+  const wobble = h.jitter == null ? "" : ` Hand position wobble: ${(h.jitter * 100).toFixed(1)} cm.`;
+  $("cam-wobble").textContent = h.camera ? (h.hand ? wobble.trim() : "No hand in view.") : "";
   $("handover-status").textContent = busy ? `Now: ${text}.`
     : h.holding ? "Holding something. Say \"give it back\" or tap Give it back."
     : h.camera ? "Ready. Say \"take this\" or tap Take from me." : "Start the camera to use these.";

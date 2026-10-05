@@ -29,6 +29,7 @@ import time
 import xml.etree.ElementTree as ET
 
 import pybullet as p
+import numpy as np
 import uvicorn
 from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
@@ -53,26 +54,39 @@ MANUAL_SPEED = 1.5  # rad/s when following the sliders
 REACH_SPEED = 3.0  # rad/s when the hand is dragged in the 3D view
 MIN_REACH_HEIGHT = 0.04  # m; a dragged target is kept this far above the table
 HANDOVER_SPEED = 0.9  # rad/s while reaching toward a person's hand
-HANDOVER_EASE_S = 0.4  # seconds to ease into and out of each hand-over move
-GRIPPER_EASE_S = 0.25
+GRIPPER_SPEED = 2.5  # rad/s
 
 
-def ease_toward(x, target, velocity, ease_s, max_speed, dt):
-    """One step of a critically damped spring: starts and stops gently, never overshoots.
+class Glide:
+    """One planned move of all joints: a quintic that starts at the current position and
+    velocity and arrives at the goal with zero velocity and acceleration.
 
-    Returns the new position and velocity.
+    It is a fixed function of time, so the same move always produces the same
+    motion, and it can be read ahead of time to lead the real arm.
     """
-    omega = 2.0 / ease_s
-    k = omega * dt
-    decay = 1.0 / (1.0 + k + 0.48 * k * k + 0.235 * k * k * k)
-    change = max(-max_speed * ease_s, min(max_speed * ease_s, x - target))
-    aim = x - change
-    push = (velocity + omega * change) * dt
-    velocity = (velocity - omega * push) * decay
-    new = aim + (change + push) * decay
-    if (target - x > 0) == (new > target):  # would pass the target: land on it
-        return target, 0.0
-    return new, velocity
+
+    PEAK = 1.875  # peak speed of this profile relative to its average speed
+
+    def __init__(self, start, velocity, goal, now):
+        self.goal = list(goal)
+        self._t0 = now
+        speeds = [HANDOVER_SPEED] * 3 + [GRIPPER_SPEED]
+        self.duration = max(0.35, max(self.PEAK * abs(g - s) / v for s, g, v in zip(start, goal, speeds)))
+        t = self.duration
+        # q(t) = s + v t + c3 t^3 + c4 t^4 + c5 t^5, with q(T) = goal, q'(T) = 0, q''(T) = 0
+        system = np.array([[t ** 3, t ** 4, t ** 5], [3 * t ** 2, 4 * t ** 3, 5 * t ** 4],
+                           [6 * t, 12 * t ** 2, 20 * t ** 3]])
+        self._joints = [(s, v, *np.linalg.solve(system, [g - s - v * t, -v, 0.0]))
+                        for s, v, g in zip(start, velocity, goal)]
+
+    def at(self, now):
+        """(positions, velocities) at a moment; holds the goal once the move is over."""
+        t = min(max(now - self._t0, 0.0), self.duration)
+        if t >= self.duration:
+            return list(self.goal), [0.0] * len(self.goal)
+        return ([s + v * t + c3 * t ** 3 + c4 * t ** 4 + c5 * t ** 5 for s, v, c3, c4, c5 in self._joints],
+                [v + 3 * c3 * t ** 2 + 4 * c4 * t ** 3 + 5 * c5 * t ** 4 for s, v, c3, c4, c5 in self._joints])
+
 
 HANDOVER_PHRASES = [
     ("give", re.compile(r"\b(give (it|that|this) (back|to me)|hand (it|that) (back|over|to me)|"
@@ -124,7 +138,7 @@ class Robot:
         self._lock = threading.RLock()
         self._goal = None
         self._goal_speed = MANUAL_SPEED
-        self._eased = False  # True while a hand-over is steering: moves ease in and out
+        self._glide = None  # the planned move a hand-over is making, if any
         self._reach = None
         self._home = False
         self._stop = threading.Event()
@@ -182,25 +196,26 @@ class Robot:
                 self.brain.stopped(self.player.label)
             self.player.cancel()
             self.handover.cancel()
-            self._goal = None
+            self._goal, self._glide = None, None
 
     def home(self):
         with self._lock:
             self.player.cancel()
             self.handover.cancel()
+            self._glide = None
             self._home = True
 
     def set_joints(self, q):
         with self._lock:
             self.player.cancel()
             self._goal, self._goal_speed = [float(v) for v in q[:4]], MANUAL_SPEED
-            self._eased = False
+            self._glide = None
 
     def reach(self, xyz):
         """Move the hand toward a point (metres, simulator frame); solved on the simulator thread."""
         with self._lock:
             self.player.cancel()
-            self._eased = False
+            self._glide = None
             self._reach = [float(xyz[0]), float(xyz[1]), max(MIN_REACH_HEIGHT, float(xyz[2]))]
 
     def set_mirror(self, on):
@@ -226,6 +241,8 @@ class Robot:
         last_sent, last_sent_at, gentle_until = None, 0.0, 0.0
         tcp = list(sim.get_ee_pose()[0])
         velocity = [0.0] * 4
+        solved_for, solved = None, None  # the last hand-over target and its joint solution
+        last_tick = time.monotonic()
         dt = 1.0 / TICK_HZ
         next_tick = time.monotonic()
         try:
@@ -252,7 +269,7 @@ class Robot:
                     if not self.torque:
                         # Motors released: someone is moving the arm by hand. Show where it is.
                         self.player.cancel()
-                        self._goal, self._home = None, False
+                        self._goal, self._home, self._glide = None, False, None
                         try:
                             measured = self.hardware.get_joint_positions()
                         except Exception as e:
@@ -262,42 +279,56 @@ class Robot:
                             q = measured
                     if self._home:
                         self._home, self._goal = False, list(sim.home_radians)
-                        self._goal_speed, self._eased = MANUAL_SPEED, False
+                        self._goal_speed, self._glide = MANUAL_SPEED, None
                     if self._reach is not None and self.torque:
                         target, self._reach = self._reach, None
                         solved = sim.solve_ik(target)[:3] + [q[3]]  # the gripper keeps its opening
                         self._goal = [min(max(v, lo), hi) for v, (lo, hi) in zip(solved, SAFE_BOUNDS)]
                         self._goal_speed = min(REACH_SPEED, ARM_MAX_SPEED) if self.mirroring else REACH_SPEED
-                    command = self.handover.update(time.monotonic(), tcp, q) if self.torque else None
+                    now = time.monotonic()
+                    elapsed, last_tick = min(0.1, now - last_tick), now  # ticks are not evenly spaced
+                    command = self.handover.update(now, tcp, q) if self.torque else None
                     if command is not None:
                         self.player.cancel()
-                        goal = list(self._goal or q)
-                        if command.joints is not None:
+                        goal = list(self._glide.goal if self._glide else q)
+                        if command.stop:
+                            if any(abs(v) > 0.02 for v in velocity[:3]):  # where it would coast to
+                                goal[:3] = [a + 0.3 * v for a, v in zip(q[:3], velocity[:3])]
+                            elif self._glide is None:
+                                goal[:3] = q[:3]
+                        elif command.joints is not None:
                             goal[:3] = command.joints
                         elif command.xyz is not None:
-                            want = [command.xyz[0], command.xyz[1], max(MIN_REACH_HEIGHT, command.xyz[2])]
-                            solved = [min(max(v, lo), hi)
-                                      for v, (lo, hi) in zip(sim.solve_ik(want)[:3], SAFE_BOUNDS)]
-                            # how close can the hand actually get? (the pose is restored below)
-                            sim.set_joint_targets(solved + [q[3]], instant=True)
-                            self.handover.reach_error = math.dist(sim.get_ee_pose()[0], want)
+                            if command.xyz != solved_for:  # solve once per target, so the goal cannot flicker
+                                want = [command.xyz[0], command.xyz[1], max(MIN_REACH_HEIGHT, command.xyz[2])]
+                                sim.set_joint_targets(list(sim.home_radians), instant=True)  # fixed starting guess
+                                for _ in range(4):
+                                    solved = [min(max(v, lo), hi)
+                                              for v, (lo, hi) in zip(sim.solve_ik(want)[:3], SAFE_BOUNDS)]
+                                    sim.set_joint_targets(solved + [q[3]], instant=True)
+                                self.handover.reach_error = math.dist(sim.get_ee_pose()[0], want)
+                                solved_for = command.xyz
                             goal[:3] = solved
                         if command.gripper is not None:
                             goal[3] = command.gripper
-                        self._goal, self._goal_speed, self._eased = goal, HANDOVER_SPEED, True
+                        if self._glide is None or max(abs(a - b) for a, b in zip(goal, self._glide.goal)) > 1e-4:
+                            self._glide = Glide(q, velocity, goal, now)
+                        self._goal = None
+                    elif self._glide is not None and self.handover.mode == "idle" and \
+                            now - self._glide._t0 > self._glide.duration:
+                        self._glide = None
                     pose = self.player.update(q)
                     if pose is not None:
-                        q, self._goal = pose, None
-                    elif self._goal is not None and self._eased:
-                        moved = [ease_toward(a, b, v, GRIPPER_EASE_S if j == 3 else HANDOVER_EASE_S,
-                                             2.0 if j == 3 else self._goal_speed, dt)
-                                 for j, (a, b, v) in enumerate(zip(q, self._goal, velocity))]
-                        q, velocity = [m[0] for m in moved], [m[1] for m in moved]
+                        q, self._goal, self._glide = pose, None, None
+                    elif self._glide is not None:
+                        q, velocity = self._glide.at(now)
                     elif self._goal is not None:
-                        step = self._goal_speed * dt
+                        step = self._goal_speed * elapsed
                         q = [a + max(-step, min(step, b - a)) for a, b in zip(q, self._goal)]
-                    if not (self._eased and self._goal is not None and pose is None):
+                    if self._glide is None:
                         velocity = [0.0] * 4
+                    arm_target = (self._glide.at(now + ARM_LATENCY)[0] if self._glide is not None
+                                  else self.player.peek(ARM_LATENCY) or q)
                     label = self.player.label
                     inventing = self.composer is not None and self.composer.busy
 
@@ -308,7 +339,7 @@ class Robot:
                     poses.append([round(v, 5) for v in (*s[4], *s[5])])
                 tcp = poses[-1][:3]
                 self.state = {
-                    "q": [round(v, 4) for v in q], "links": poses, "gesture": label,
+                    "t": round(now, 4), "q": [round(v, 5) for v in q], "links": poses, "gesture": label,
                     "inventing": inventing, "mirror": self.mirroring, "torque": self.torque,
                     "hardware": self.hardware is not None and self.hardware.connected,
                     "handover": self.handover.status(),
@@ -326,7 +357,7 @@ class Robot:
                         gap = (max(abs(a - b) for a, b in zip(q, measured))
                                if measured else 1.5)
                         gentle_until = now + gap / CATCH_UP_SPEED + 0.3
-                    target = self.player.peek(ARM_LATENCY) or q
+                    target = [min(max(v, lo), hi) for v, (lo, hi) in zip(arm_target, SAFE_BOUNDS)]
                     moved = last_sent is None or max(
                         abs(a - b) for a, b in zip(target, last_sent)) > MIRROR_EPSILON
                     if moved and now - last_sent_at > MIRROR_MIN_INTERVAL:
@@ -338,7 +369,7 @@ class Robot:
                             print(f"[hardware] mirror failed: {e}")
                         last_sent_at = now
 
-                next_tick += dt
+                next_tick = max(next_tick + dt, time.monotonic())  # late? carry on, don't bunch up
                 time.sleep(max(0.0, next_tick - time.monotonic()))
         finally:
             sim.close()

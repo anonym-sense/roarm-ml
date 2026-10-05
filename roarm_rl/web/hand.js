@@ -9,7 +9,7 @@
 const VISION = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 const FOV = (62 * Math.PI) / 180; // assumed horizontal field of view
-const PAIRS = [[0, 5], [0, 9], [0, 13], [0, 17], [5, 17], [5, 9], [9, 13], [13, 17]]; // palm bones
+const RIGID = [0, 1, 5, 9, 13, 17]; // wrist and knuckles: the part of the hand that keeps its shape
 const BONES = [[0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [5, 6], [6, 7], [7, 8], [5, 9], [9, 10], [10, 11],
   [11, 12], [9, 13], [13, 14], [14, 15], [15, 16], [13, 17], [17, 18], [18, 19], [19, 20], [0, 17]];
 
@@ -33,15 +33,19 @@ async function loadTracker() {
 /** Hand position in the camera frame from one detection. */
 export function locate(image, world, width, height) {
   const focal = width / 2 / Math.tan(FOV / 2);
-  const depths = [];
-  for (const [a, b] of PAIRS) {
-    const real = Math.hypot(world[a].x - world[b].x, world[a].y - world[b].y); // length as the camera sees it
-    const pixels = Math.hypot((image[a].x - image[b].x) * width, (image[a].y - image[b].y) * height);
-    if (real > 0.015 && pixels > 6) depths.push((focal * real) / pixels);
+  // Pixels per metre, by least squares over the rigid part of the hand: the one scale
+  // that best lays the hand's real outline (as the camera faces it) over its picture.
+  const centre = (get) => RIGID.reduce((s, i) => s + get(i), 0) / RIGID.length;
+  const wx = centre((i) => world[i].x), wy = centre((i) => world[i].y);
+  const px = centre((i) => image[i].x * width), py = centre((i) => image[i].y * height);
+  let top = 0, bottom = 0;
+  for (const i of RIGID) {
+    const ax = world[i].x - wx, ay = world[i].y - wy;
+    top += ax * (image[i].x * width - px) + ay * (image[i].y * height - py);
+    bottom += ax * ax + ay * ay;
   }
-  if (!depths.length) return null;
-  depths.sort((a, b) => a - b);
-  const depth = depths[depths.length >> 1];
+  if (bottom < 1e-5 || top <= 0) return null; // hand edge-on to the camera: no usable size
+  const depth = (focal * bottom) / top;
   const point = (i) => {
     const z = depth + world[i].z;
     return [((image[i].x - 0.5) * width * z) / focal, ((image[i].y - 0.5) * height * z) / focal, z];
@@ -91,11 +95,21 @@ export class HandCamera {
         const hand = found.landmarks?.[0]
           ? locate(found.landmarks[0], found.worldLandmarks[0], this.video.videoWidth, this.video.videoHeight)
           : null;
-        this.onHand(hand);
+        this.onHand(this.steady(hand));
       }
       this.video.requestVideoFrameCallback ? this.video.requestVideoFrameCallback(tick) : requestAnimationFrame(tick);
     };
     tick();
+  }
+
+  /** Distance is the noisiest number and changes slowly, so it is smoothed harder than the rest. */
+  steady(hand) {
+    if (!hand) { this.depth = null; return null; }
+    const jump = this.depth && Math.abs(hand.depth - this.depth) / this.depth > 0.25;
+    this.depth = !this.depth || jump ? hand.depth : this.depth + 0.25 * (hand.depth - this.depth);
+    const k = this.depth / hand.depth;
+    const scale = (p) => p.map((v) => v * k);
+    return { ...hand, pinch: scale(hand.pinch), palm: scale(hand.palm), depth: this.depth };
   }
 
   stop() {

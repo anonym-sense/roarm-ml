@@ -138,11 +138,15 @@ where the arm thinks your hand is.
   moves above your palm, opens, and backs away.
 - **Follow my hand**: the arm hovers a few centimetres short of your hand.
 
-Hand-over moves ease in and out (a critically damped spring on each joint)
-and aim at a steadied copy of your hand's position, so the arm glides
-rather than chasing camera jitter.
-- `stop`, the Stop button, or taking your hand out of view for six seconds
-  ends it.
+The arm does not chase your hand as it moves, because a hand seen by one
+camera wobbles by centimetres and chasing that makes the arm shake. It looks,
+then moves: once your hand has been still for a moment, its position is
+averaged and locked, the joint angles for that point are solved once, and
+the arm makes one planned move there (a quintic that starts and ends at
+rest). The gripper only acts after the arm has stopped. If your hand wanders
+more than about 4.5 cm from the locked point, the arm halts and waits for it
+to settle again. The Camera tab shows how much the hand position is
+wobbling.
 
 Distance comes from one ordinary camera, by comparing the hand's real
 proportions with its size in the picture, so expect errors of a few
@@ -153,7 +157,8 @@ scale, shift and a depth correction). The six positions sit in a box about
 14 cm deep, 12 cm wide and 14 cm tall in front of the arm, so they stay in
 the camera's view. In simulation with 1 cm of noise on each pinch, the fit
 was off by 1.4 cm on average across the hand-over area, under 2.6 cm 95% of
-the time, 5.1 cm at worst.
+the time, 5.1 cm at worst. A calibration result above about 3 cm means
+the pinches were inconsistent; redo it.
 Recalibrate whenever the camera or the arm is moved. The calibration is
 saved in `data/`.
 
