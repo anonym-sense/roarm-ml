@@ -148,6 +148,14 @@ more than about 4.5 cm from the locked point, the arm halts and waits for it
 to settle again. The Camera tab shows how much the hand position is
 wobbling.
 
+Checked on a real RoArm-M2 with a synthetic hand that wobbled 1.2 cm: a take
+and a give ran to completion, the arm stayed within 0.035 rad of the picture
+at worst (0.012 rad on average) with no time lag, and its speed and
+acceleration matched the plan. Eight ways of sending the same planned move
+to the servos were compared; all of the streaming ones followed it within
+about 6 to 18 mrad with no stalls, reversals or overshoot, so the servos
+themselves are not a source of shake.
+
 Distance comes from one ordinary camera, by comparing the hand's real
 proportions with its size in the picture, so expect errors of a few
 centimetres. **Calibrate** before using the real arm: the arm goes to six
@@ -339,10 +347,11 @@ Training runs headless with PPO and writes checkpoints to
   settings reached the target in 1 of 20 evaluation episodes, with a mean
   final distance of 12.7 cm. The environment and training loop run end to end;
   the reward, observation or hyperparameters still need work.
-- Hand-over was tested in the simulator only: the logic with a synthetic
-  hand, and the camera path in a headless browser whose camera showed a
-  photo of a hand. It has not been run with a live camera, a real hand-over,
-  or the real arm, and the calibration routine has never been done for real.
+- Hand-over: the logic was tested with a synthetic hand in the simulator and
+  on the real arm (gripping nothing), and the camera path in a headless
+  browser whose camera showed a photo of a hand. Not yet verified here: a
+  live camera, a real object changing hands, and the calibration routine
+  with the new distance estimate.
 - The web app was tested in the simulator from a desktop browser, including
   speech sent as a recorded file, and its mirroring was measured on a real
   RoArm-M2 over USB (joints land within about 0.01 rad of a commanded pose).

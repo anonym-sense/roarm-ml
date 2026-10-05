@@ -104,6 +104,9 @@ ARM_LATENCY = 0.18
 ARM_MAX_SPEED = 1.6
 ARM_FAST = (1500, 60)  # servo speed, acceleration while following
 ARM_GENTLE = (300, 10)  # while catching up after mirroring is switched on
+# During a planned hand-over move the servos are capped at about 1.35 rad/s (the plan
+# peaks at 0.9), so a command that arrives late cannot make the arm sprint to catch up.
+ARM_PLANNED = (880, 60)
 CATCH_UP_SPEED = 0.4  # rad/s the arm manages at ARM_GENTLE
 COOKIE = "roarm_access"
 
@@ -361,7 +364,8 @@ class Robot:
                     moved = last_sent is None or max(
                         abs(a - b) for a, b in zip(target, last_sent)) > MIRROR_EPSILON
                     if moved and now - last_sent_at > MIRROR_MIN_INTERVAL:
-                        speed, acc = ARM_GENTLE if now < gentle_until else ARM_FAST
+                        speed, acc = (ARM_GENTLE if now < gentle_until
+                                      else ARM_PLANNED if self._glide is not None else ARM_FAST)
                         try:
                             self.hardware.set_joint_targets(target, speed, acc)
                             last_sent = list(target)
