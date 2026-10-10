@@ -16,3 +16,6 @@ faster-whisper>=1.0
 # Optional: only needed for --hw serial / --hw http (real RoArm-M2 mirroring)
 roarm-sdk>=0.1.1
 pyserial>=3.5
+
+# Optional: only needed for roarm_rl.benchmark_report (figures for docs/paper)
+matplotlib>=3.8

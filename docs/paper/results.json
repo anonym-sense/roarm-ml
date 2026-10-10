@@ -1,0 +1,2985 @@
+{
+ "static": {
+  "base": {
+   "bias_mrad": 1.9191319444444137,
+   "rms_mrad": 7.054613409386977,
+   "max_mrad": 12.349999999999861,
+   "hysteresis_mrad": -12.388166666666644,
+   "repeat_mrad": 0.7072525148711639,
+   "noise_mrad": 0.028202974045128344,
+   "settle_s": 0.25950000000000006,
+   "settle_max_s": 0.2915,
+   "n": 36
+  },
+  "shoulder": {
+   "bias_mrad": 2.3556274352689957,
+   "rms_mrad": 4.345325735688108,
+   "max_mrad": 9.810000000000096,
+   "hysteresis_mrad": -2.5624984917043747,
+   "repeat_mrad": 1.8345364769556298,
+   "noise_mrad": 3.960740307033338,
+   "settle_s": 0.8340000000000001,
+   "settle_max_s": 1.018,
+   "n": 36
+  },
+  "elbow": {
+   "bias_mrad": 5.46749999999982,
+   "rms_mrad": 8.46188070112066,
+   "max_mrad": 14.490000000000336,
+   "hysteresis_mrad": -12.682000000000127,
+   "repeat_mrad": 0.6246198844097686,
+   "noise_mrad": 3.7007434154171886e-13,
+   "settle_s": 0.24249999999999988,
+   "settle_max_s": 0.2895,
+   "n": 36
+  },
+  "gripper": {
+   "bias_mrad": -0.08500000000005994,
+   "rms_mrad": 2.958921537767923,
+   "max_mrad": 4.430000000000003,
+   "hysteresis_mrad": -5.115333333333348,
+   "repeat_mrad": 0.36298148100913685,
+   "noise_mrad": 7.478585651988903e-14,
+   "settle_s": 0.25550000000000006,
+   "settle_max_s": 0.3175,
+   "n": 36
+  }
+ },
+ "poses": {
+  "n_poses": 24,
+  "n_visits": 48,
+  "tcp_mean_mm": 3.0046171876875327,
+  "tcp_median_mm": 2.8618857315274413,
+  "tcp_p95_mm": 5.301131883212097,
+  "tcp_max_mm": 6.520662263263718,
+  "repeat_mean_mm": 2.143172448265711,
+  "repeat_max_mm": 7.025481960464045,
+  "joint_rms_mrad": {
+   "base": 8.347145829427062,
+   "shoulder": 3.0086026627647713,
+   "elbow": 6.970944224626211,
+   "gripper": 2.7091400050675563
+  },
+  "joint_bias_mrad": {
+   "base": 3.5557421875000235,
+   "shoulder": 0.5968253968253951,
+   "elbow": 5.427924603174566,
+   "gripper": 0.6682291666667058
+  }
+ },
+ "step": {
+  "by_profile": {
+   "base 1500/60": {
+    "dead_s": 0.13675,
+    "rise_s": 0.26975000000000005,
+    "peak_speed": 1.958297872340425,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 0.48824999999999996,
+    "final_error_mrad": 2.3050000000000015
+   },
+   "base 880/60": {
+    "dead_s": 0.1175,
+    "rise_s": 0.3165,
+    "peak_speed": 1.468617021276596,
+    "overshoot_mrad": 1.3877787807814457e-14,
+    "settle_s": 0.5237499999999999,
+    "final_error_mrad": 3.069999999999962
+   },
+   "base 300/10": {
+    "dead_s": 0.17975,
+    "rise_s": 0.86725,
+    "peak_speed": 0.5251056866899431,
+    "overshoot_mrad": 4.163336342344337e-14,
+    "settle_s": 1.2735,
+    "final_error_mrad": 2.3049999999999873
+   },
+   "shoulder 1500/60": {
+    "dead_s": 0.08574999999999999,
+    "rise_s": 0.2615,
+    "peak_speed": 1.8873542518377056,
+    "overshoot_mrad": 4.009230769230779,
+    "settle_s": 0.492,
+    "final_error_mrad": 1.7092307692307824
+   },
+   "shoulder 880/60": {
+    "dead_s": 0.11699999999999999,
+    "rise_s": 0.3045,
+    "peak_speed": 1.5906929068067206,
+    "overshoot_mrad": 4.2461538461538995,
+    "settle_s": 0.58975,
+    "final_error_mrad": -0.3538461538461768
+   },
+   "shoulder 300/10": {
+    "dead_s": 0.137,
+    "rise_s": 0.8632500000000001,
+    "peak_speed": 0.7370537037589657,
+    "overshoot_mrad": 4.92250000000001,
+    "settle_s": 1.723,
+    "final_error_mrad": 3.517500000000021
+   },
+   "elbow 1500/60": {
+    "dead_s": 0.1175,
+    "rise_s": 0.27325,
+    "peak_speed": 1.9179849402683686,
+    "overshoot_mrad": 3.3306690738754696e-13,
+    "settle_s": 0.50425,
+    "final_error_mrad": 4.215000000000191
+   },
+   "elbow 880/60": {
+    "dead_s": 0.11325,
+    "rise_s": 0.31625,
+    "peak_speed": 1.5418265146767745,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.531,
+    "final_error_mrad": 4.9800000000000955
+   },
+   "elbow 300/10": {
+    "dead_s": 0.16025,
+    "rise_s": 0.8632500000000001,
+    "peak_speed": 0.541378800990719,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.2617500000000001,
+    "final_error_mrad": 5.745000000000222
+   },
+   "gripper 1500/60": {
+    "dead_s": 0.101,
+    "rise_s": 0.28875,
+    "peak_speed": 2.0591109884316614,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5035,
+    "final_error_mrad": -0.21499999999993746
+   },
+   "gripper 880/60": {
+    "dead_s": 0.098,
+    "rise_s": 0.32799999999999996,
+    "peak_speed": 1.460226144649023,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5355,
+    "final_error_mrad": -0.21499999999993746
+   },
+   "gripper 300/10": {
+    "dead_s": 0.13675,
+    "rise_s": 0.8632500000000001,
+    "peak_speed": 0.5549999999999997,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.27325,
+    "final_error_mrad": -0.21499999999993746
+   }
+  },
+  "dead_s_mean": 0.1187142857142857,
+  "dead_s_min": 0.0465,
+  "dead_s_max": 0.18,
+  "peak_speed_fast": {
+   "base": 2.4804255319148947,
+   "shoulder": 1.9796021206966874,
+   "elbow": 1.990851063829787,
+   "gripper": 2.138409378015181
+  },
+  "overshoot_max_mrad": 10.606666666666667,
+  "small_step_error_mrad": {
+   "base": 3.5250000000000004,
+   "shoulder": 3.19583333333333,
+   "elbow": 5.750000000000033,
+   "gripper": 3.524999999999945
+  },
+  "runs": [
+   {
+    "joint": "base",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.133,
+    "rise_s": 0.07049999999999998,
+    "peak_speed": 0.4895744680851064,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.1565,
+    "final_error_mrad": -1.9900000000000022
+   },
+   {
+    "joint": "base",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1015,
+    "rise_s": NaN,
+    "peak_speed": 0.4895744680851065,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.1485,
+    "final_error_mrad": 5.059999999999999
+   },
+   {
+    "joint": "base",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1175,
+    "rise_s": 0.17200000000000001,
+    "peak_speed": 1.1751063829787238,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.313,
+    "final_error_mrad": -3.359999999999974
+   },
+   {
+    "joint": "base",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.133,
+    "rise_s": 0.18000000000000002,
+    "peak_speed": 1.1423404255319154,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.305,
+    "final_error_mrad": 7.960000000000009
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1405,
+    "rise_s": 0.2735,
+    "peak_speed": 1.9582978723404239,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 0.492,
+    "final_error_mrad": -4.560000000000036
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.133,
+    "rise_s": 0.266,
+    "peak_speed": 1.958297872340426,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 0.4845,
+    "final_error_mrad": 9.170000000000039
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1255,
+    "rise_s": 0.3125,
+    "peak_speed": 1.5012765957446808,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 0.516,
+    "final_error_mrad": -4.560000000000036
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.3205,
+    "peak_speed": 1.4359574468085112,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5315,
+    "final_error_mrad": 10.69999999999996
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "up",
+    "dead_s": 0.1795,
+    "rise_s": 0.8594999999999999,
+    "peak_speed": 0.5280837138054174,
+    "overshoot_mrad": 5.551115123125783e-14,
+    "settle_s": 1.2655,
+    "final_error_mrad": -4.5600000000000644
+   },
+   {
+    "joint": "base",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "down",
+    "dead_s": 0.18,
+    "rise_s": 0.875,
+    "peak_speed": 0.5221276595744686,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 1.2815,
+    "final_error_mrad": 9.170000000000039
+   },
+   {
+    "joint": "base",
+    "size": 1.0,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1325,
+    "rise_s": 0.39849999999999997,
+    "peak_speed": 2.4804255319148947,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.7105,
+    "final_error_mrad": -6.059999999999954
+   },
+   {
+    "joint": "base",
+    "size": 1.0,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.133,
+    "rise_s": 0.43,
+    "peak_speed": 2.4476595744680862,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.7345,
+    "final_error_mrad": 9.12999999999997
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.094,
+    "rise_s": 0.07,
+    "peak_speed": 0.5602776202838866,
+    "overshoot_mrad": 7.285000000000004,
+    "settle_s": 1.0705,
+    "final_error_mrad": 2.9949999999999943
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.0465,
+    "rise_s": 0.047000000000000014,
+    "peak_speed": 0.848510638297872,
+    "overshoot_mrad": 10.606666666666667,
+    "settle_s": 0.398,
+    "final_error_mrad": 3.396666666666666
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.117,
+    "rise_s": 0.1565,
+    "peak_speed": 1.436170212765958,
+    "overshoot_mrad": 1.5300000000000176,
+    "settle_s": 0.3125,
+    "final_error_mrad": -0.29000000000002635
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.172,
+    "peak_speed": 1.1480563304011637,
+    "overshoot_mrad": 7.54249999999998,
+    "settle_s": 0.2815,
+    "final_error_mrad": 3.2324999999999853
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.0625,
+    "rise_s": 0.25,
+    "peak_speed": 1.795106382978724,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.4845,
+    "final_error_mrad": 1.5700000000000158
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.109,
+    "rise_s": 0.273,
+    "peak_speed": 1.9796021206966874,
+    "overshoot_mrad": 8.018461538461558,
+    "settle_s": 0.4995,
+    "final_error_mrad": 1.8484615384615488
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.125,
+    "rise_s": 0.2965,
+    "peak_speed": 1.697234042553192,
+    "overshoot_mrad": 1.5300000000000868,
+    "settle_s": 0.547,
+    "final_error_mrad": 0.03999999999992898
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.109,
+    "rise_s": 0.3125,
+    "peak_speed": 1.4841517710602492,
+    "overshoot_mrad": 6.9623076923077125,
+    "settle_s": 0.6325,
+    "final_error_mrad": -0.7476923076922826
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "up",
+    "dead_s": 0.149,
+    "rise_s": 0.8515,
+    "peak_speed": 0.913829787234044,
+    "overshoot_mrad": 9.844999999999992,
+    "settle_s": 2.196,
+    "final_error_mrad": 5.535000000000013
+   },
+   {
+    "joint": "shoulder",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "down",
+    "dead_s": 0.125,
+    "rise_s": 0.875,
+    "peak_speed": 0.5602776202838875,
+    "overshoot_mrad": 2.7755575615628914e-14,
+    "settle_s": 1.25,
+    "final_error_mrad": 1.500000000000029
+   },
+   {
+    "joint": "elbow",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1175,
+    "rise_s": 0.07800000000000001,
+    "peak_speed": 0.5995760596023203,
+    "overshoot_mrad": 1.5300000000000313,
+    "settle_s": 0.1405,
+    "final_error_mrad": 0.6900000000000794
+   },
+   {
+    "joint": "elbow",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1015,
+    "rise_s": NaN,
+    "peak_speed": 0.46204231446390764,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.148,
+    "final_error_mrad": 10.809999999999986
+   },
+   {
+    "joint": "elbow",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1095,
+    "rise_s": 0.172,
+    "peak_speed": 1.2076595744680887,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.289,
+    "final_error_mrad": -0.6800000000000139
+   },
+   {
+    "joint": "elbow",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.1955,
+    "peak_speed": 1.175106382978722,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.3045,
+    "final_error_mrad": 12.170000000000236
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1255,
+    "rise_s": 0.25,
+    "peak_speed": 1.990851063829787,
+    "overshoot_mrad": 2.220446049250313e-13,
+    "settle_s": 0.5005,
+    "final_error_mrad": -0.3500000000000725
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.2965,
+    "peak_speed": 1.8451188167069503,
+    "overshoot_mrad": 4.440892098500626e-13,
+    "settle_s": 0.508,
+    "final_error_mrad": 8.780000000000454
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.117,
+    "rise_s": 0.3045,
+    "peak_speed": 1.6319148936170258,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.523,
+    "final_error_mrad": -0.34999999999985043
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.32799999999999996,
+    "peak_speed": 1.451738135736523,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.539,
+    "final_error_mrad": 10.310000000000041
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "up",
+    "dead_s": 0.164,
+    "rise_s": 0.8515000000000001,
+    "peak_speed": 0.5278639849601596,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.2655,
+    "final_error_mrad": 1.180000000000403
+   },
+   {
+    "joint": "elbow",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "down",
+    "dead_s": 0.1565,
+    "rise_s": 0.875,
+    "peak_speed": 0.5548936170212784,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.258,
+    "final_error_mrad": 10.310000000000041
+   },
+   {
+    "joint": "gripper",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1015,
+    "rise_s": 0.1015,
+    "peak_speed": 0.5548936170212784,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.125,
+    "final_error_mrad": -3.7399999999998546
+   },
+   {
+    "joint": "gripper",
+    "size": 0.05,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.109,
+    "rise_s": 0.10149999999999999,
+    "peak_speed": 0.48635853980534804,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.1405,
+    "final_error_mrad": 3.310000000000035
+   },
+   {
+    "joint": "gripper",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.1095,
+    "rise_s": 0.172,
+    "peak_speed": 1.2074468085106371,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.3125,
+    "final_error_mrad": -2.0399999999999308
+   },
+   {
+    "joint": "gripper",
+    "size": 0.2,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1095,
+    "rise_s": 0.203,
+    "peak_speed": 1.1748936170212794,
+    "overshoot_mrad": 1.1102230246251565e-13,
+    "settle_s": 0.3125,
+    "final_error_mrad": 1.6100000000001113
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.101,
+    "rise_s": 0.2965,
+    "peak_speed": 1.9798125988481416,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.4995,
+    "final_error_mrad": -1.7099999999998783
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     1500,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.101,
+    "rise_s": 0.281,
+    "peak_speed": 2.138409378015181,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5075,
+    "final_error_mrad": 1.2800000000000034
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "up",
+    "dead_s": 0.0945,
+    "rise_s": 0.32799999999999996,
+    "peak_speed": 1.4687234042553197,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5475,
+    "final_error_mrad": -1.7099999999998783
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     880,
+     60
+    ],
+    "direction": "down",
+    "dead_s": 0.1015,
+    "rise_s": 0.328,
+    "peak_speed": 1.4517288850427263,
+    "overshoot_mrad": 0.0,
+    "settle_s": 0.5235,
+    "final_error_mrad": 1.2800000000000034
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "up",
+    "dead_s": 0.1095,
+    "rise_s": 0.8515000000000001,
+    "peak_speed": 0.5223404255319153,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.2655,
+    "final_error_mrad": -1.7099999999998783
+   },
+   {
+    "joint": "gripper",
+    "size": 0.5,
+    "profile": [
+     300,
+     10
+    ],
+    "direction": "down",
+    "dead_s": 0.164,
+    "rise_s": 0.8749999999999999,
+    "peak_speed": 0.5876595744680841,
+    "overshoot_mrad": 0.0,
+    "settle_s": 1.281,
+    "final_error_mrad": 1.2800000000000034
+   }
+  ]
+ },
+ "sine": {
+  "fits": [
+   {
+    "joint": "base",
+    "hz": 0.2,
+    "amplitude": 0.15,
+    "gain": 0.9711173507661868,
+    "lag_s": 0.14148617646143796,
+    "phase_deg": 10.187004705223533,
+    "offset_mrad": 2.2091359075809454,
+    "distortion": 0.028913060061740024,
+    "rms_error_mrad": 18.01814394255007,
+    "peak_speed": 0.2624749044810345,
+    "asked_speed": 0.18849555921538758,
+    "commands_hz": 16.6
+   },
+   {
+    "joint": "base",
+    "hz": 0.4,
+    "amplitude": 0.15,
+    "gain": 0.9755485301025141,
+    "lag_s": 0.1288283623925709,
+    "phase_deg": 18.551284184530207,
+    "offset_mrad": 2.3642850408120974,
+    "distortion": 0.028464598477851898,
+    "rms_error_mrad": 32.66992134539484,
+    "peak_speed": 0.4435461849305779,
+    "asked_speed": 0.37699111843077515,
+    "commands_hz": 18.32
+   },
+   {
+    "joint": "base",
+    "hz": 0.7,
+    "amplitude": 0.15,
+    "gain": 0.9685290579563931,
+    "lag_s": 0.13549573750715196,
+    "phase_deg": 34.1449258518023,
+    "offset_mrad": 1.9278989618245488,
+    "distortion": 0.03467188570111449,
+    "rms_error_mrad": 59.68410532796818,
+    "peak_speed": 0.7587096774193551,
+    "asked_speed": 0.6597344572538565,
+    "commands_hz": 19.599999999999998
+   },
+   {
+    "joint": "base",
+    "hz": 1.0,
+    "amplitude": 0.15,
+    "gain": 0.9243612853891158,
+    "lag_s": 0.14534924982310343,
+    "phase_deg": 52.32572993631724,
+    "offset_mrad": 2.027335394659789,
+    "distortion": 0.04947352419748223,
+    "rms_error_mrad": 88.46620490001685,
+    "peak_speed": 1.0476311000827208,
+    "asked_speed": 0.9424777960769379,
+    "commands_hz": 20.0
+   },
+   {
+    "joint": "base",
+    "hz": 1.5,
+    "amplitude": 0.15,
+    "gain": 0.802182306003992,
+    "lag_s": 0.31386255850094824,
+    "phase_deg": 169.48578159051203,
+    "offset_mrad": 1.2269380741721374,
+    "distortion": 0.22164282076767816,
+    "rms_error_mrad": 194.0110621772451,
+    "peak_speed": 1.3755341492470463,
+    "asked_speed": 1.413716694115407,
+    "commands_hz": 20.0
+   },
+   {
+    "joint": "base",
+    "hz": 2.0,
+    "amplitude": 0.15,
+    "gain": 0.4323218909476572,
+    "lag_s": 0.29692275071116286,
+    "phase_deg": 213.78438051203725,
+    "offset_mrad": -2.011718147742841,
+    "distortion": 0.32881564380602923,
+    "rms_error_mrad": 151.10374968517135,
+    "peak_speed": 1.1123676944665684,
+    "asked_speed": 1.8849555921538759,
+    "commands_hz": 20.5
+   },
+   {
+    "joint": "base",
+    "hz": 3.0,
+    "amplitude": 0.15,
+    "gain": 0.16817101020073,
+    "lag_s": 0.24011720245137902,
+    "phase_deg": 259.3265786474893,
+    "offset_mrad": 13.82911783081414,
+    "distortion": 0.24251759413705473,
+    "rms_error_mrad": 114.02270819059194,
+    "peak_speed": 0.7995744680851038,
+    "asked_speed": 2.827433388230814,
+    "commands_hz": 20.75
+   },
+   {
+    "joint": "base",
+    "hz": 0.2,
+    "amplitude": 0.4,
+    "gain": 0.9917566195972202,
+    "lag_s": 0.13448709107652246,
+    "phase_deg": 9.683070557509618,
+    "offset_mrad": 1.9332242524792986,
+    "distortion": 0.013082372488310982,
+    "rms_error_mrad": 46.08853469674723,
+    "peak_speed": 0.5887601784795764,
+    "asked_speed": 0.5026548245743669,
+    "commands_hz": 18.68
+   },
+   {
+    "joint": "base",
+    "hz": 0.4,
+    "amplitude": 0.4,
+    "gain": 0.9854086937293335,
+    "lag_s": 0.15074024490742327,
+    "phase_deg": 21.706595266668952,
+    "offset_mrad": 2.1273214675637533,
+    "distortion": 0.020734758143270148,
+    "rms_error_mrad": 103.56900272226625,
+    "peak_speed": 1.0822388002892698,
+    "asked_speed": 1.0053096491487339,
+    "commands_hz": 19.52
+   },
+   {
+    "joint": "base",
+    "hz": 0.7,
+    "amplitude": 0.4,
+    "gain": 0.9607250319956088,
+    "lag_s": 0.1884740046549218,
+    "phase_deg": 47.49544917304029,
+    "offset_mrad": -0.7465266289106154,
+    "distortion": 0.03507239895415309,
+    "rms_error_mrad": 220.85705417090298,
+    "peak_speed": 1.9554314274149505,
+    "asked_speed": 1.7592918860102842,
+    "commands_hz": 20.299999999999997
+   },
+   {
+    "joint": "base",
+    "hz": 1.0,
+    "amplitude": 0.4,
+    "gain": 0.6859945120766626,
+    "lag_s": 0.4729053617220309,
+    "phase_deg": 170.24593021993113,
+    "offset_mrad": -18.48519431495746,
+    "distortion": 0.2158941385473609,
+    "rms_error_mrad": 480.11524087452176,
+    "peak_speed": 2.284680851063833,
+    "asked_speed": 2.5132741228718345,
+    "commands_hz": 20.8
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.2,
+    "amplitude": 0.15,
+    "gain": 0.9957260888875743,
+    "lag_s": 0.11960724336385525,
+    "phase_deg": 8.611721522197579,
+    "offset_mrad": 1.8571030081649917,
+    "distortion": 0.03334970933181049,
+    "rms_error_mrad": 15.319605782751466,
+    "peak_speed": 0.43680544067643545,
+    "asked_speed": 0.18849555921538758,
+    "commands_hz": 16.72
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.4,
+    "amplitude": 0.15,
+    "gain": 0.9970251999330809,
+    "lag_s": 0.1180520532783535,
+    "phase_deg": 16.999495672082904,
+    "offset_mrad": 1.5888716908670912,
+    "distortion": 0.029292245955341387,
+    "rms_error_mrad": 30.139956890037737,
+    "peak_speed": 0.4731914893617003,
+    "asked_speed": 0.37699111843077515,
+    "commands_hz": 18.24
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.7,
+    "amplitude": 0.15,
+    "gain": 0.9885132833374787,
+    "lag_s": 0.12835109930762814,
+    "phase_deg": 32.34447702552229,
+    "offset_mrad": 1.3825377054552321,
+    "distortion": 0.03928879288253475,
+    "rms_error_mrad": 56.81025290766686,
+    "peak_speed": 0.8383120763124012,
+    "asked_speed": 0.6597344572538565,
+    "commands_hz": 19.04
+   },
+   {
+    "joint": "shoulder",
+    "hz": 1.0,
+    "amplitude": 0.15,
+    "gain": 0.9557035208617151,
+    "lag_s": 0.1391081839846538,
+    "phase_deg": 50.07894623447537,
+    "offset_mrad": 1.4974642145006434,
+    "distortion": 0.05217543545716538,
+    "rms_error_mrad": 86.5028374061241,
+    "peak_speed": 1.080385574832671,
+    "asked_speed": 0.9424777960769379,
+    "commands_hz": 20.0
+   },
+   {
+    "joint": "shoulder",
+    "hz": 1.5,
+    "amplitude": 0.15,
+    "gain": 0.8343394500589589,
+    "lag_s": 0.3064684374333128,
+    "phase_deg": 165.49295621398892,
+    "offset_mrad": -1.5682258339674884,
+    "distortion": 0.2652678638882795,
+    "rms_error_mrad": 196.15685262306266,
+    "peak_speed": 1.5665957446808512,
+    "asked_speed": 1.413716694115407,
+    "commands_hz": 20.5
+   },
+   {
+    "joint": "shoulder",
+    "hz": 2.0,
+    "amplitude": 0.15,
+    "gain": 0.4385031450967969,
+    "lag_s": 0.2844670039509856,
+    "phase_deg": 204.81624284470962,
+    "offset_mrad": -7.310366305315434,
+    "distortion": 0.2639708905087327,
+    "rms_error_mrad": 154.00725439190626,
+    "peak_speed": 1.2274172640042496,
+    "asked_speed": 1.8849555921538759,
+    "commands_hz": 20.75
+   },
+   {
+    "joint": "shoulder",
+    "hz": 3.0,
+    "amplitude": 0.15,
+    "gain": 0.1912757242045955,
+    "lag_s": 0.236689758997972,
+    "phase_deg": 255.62493971780975,
+    "offset_mrad": 12.557013564501782,
+    "distortion": 0.27001464361512106,
+    "rms_error_mrad": 118.23428185843119,
+    "peak_speed": 0.8648936170212779,
+    "asked_speed": 2.827433388230814,
+    "commands_hz": 21.0
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.2,
+    "amplitude": 0.4,
+    "gain": 1.0077396556577616,
+    "lag_s": 0.12524386914754174,
+    "phase_deg": 9.017558578623005,
+    "offset_mrad": 1.1192712530277495,
+    "distortion": 0.027430031604775085,
+    "rms_error_mrad": 43.70871016252468,
+    "peak_speed": 0.8105959525108482,
+    "asked_speed": 0.5026548245743669,
+    "commands_hz": 18.92
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.4,
+    "amplitude": 0.4,
+    "gain": 1.0004510808634604,
+    "lag_s": 0.1474535281436138,
+    "phase_deg": 21.233308052680382,
+    "offset_mrad": 1.1058380087019815,
+    "distortion": 0.035961221022798834,
+    "rms_error_mrad": 102.61464050290243,
+    "peak_speed": 1.277646410407932,
+    "asked_speed": 1.0053096491487339,
+    "commands_hz": 19.68
+   },
+   {
+    "joint": "shoulder",
+    "hz": 0.7,
+    "amplitude": 0.4,
+    "gain": 0.9738156058330821,
+    "lag_s": 0.18380974740452294,
+    "phase_deg": 46.320056345939776,
+    "offset_mrad": 2.156869147752649,
+    "distortion": 0.039211814384029556,
+    "rms_error_mrad": 218.15321331503418,
+    "peak_speed": 2.03167186576864,
+    "asked_speed": 1.7592918860102842,
+    "commands_hz": 20.02
+   },
+   {
+    "joint": "shoulder",
+    "hz": 1.0,
+    "amplitude": 0.4,
+    "gain": 0.7143716165086518,
+    "lag_s": 0.46489295537066244,
+    "phase_deg": 167.36146393343847,
+    "offset_mrad": 10.247259196008795,
+    "distortion": 0.20588423655805255,
+    "rms_error_mrad": 490.015610455908,
+    "peak_speed": 2.4531692963924905,
+    "asked_speed": 2.5132741228718345,
+    "commands_hz": 21.0
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.2,
+    "amplitude": 0.15,
+    "gain": 0.9762069963088377,
+    "lag_s": 0.13942111552584974,
+    "phase_deg": 10.038320317861182,
+    "offset_mrad": 6.367022835880309,
+    "distortion": 0.031020794092265477,
+    "rms_error_mrad": 19.004410388179224,
+    "peak_speed": 0.28311715581817154,
+    "asked_speed": 0.18849555921538758,
+    "commands_hz": 16.68
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.4,
+    "amplitude": 0.15,
+    "gain": 0.9849482471125306,
+    "lag_s": 0.13088482111698801,
+    "phase_deg": 18.847414240846273,
+    "offset_mrad": 6.455820542221602,
+    "distortion": 0.028730020640898298,
+    "rms_error_mrad": 33.943872722159306,
+    "peak_speed": 0.4627833632088958,
+    "asked_speed": 0.37699111843077515,
+    "commands_hz": 18.64
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.7,
+    "amplitude": 0.15,
+    "gain": 0.9794574403108125,
+    "lag_s": 0.13715268391732088,
+    "phase_deg": 34.56247634716486,
+    "offset_mrad": 6.195256960717543,
+    "distortion": 0.02469628745401506,
+    "rms_error_mrad": 61.2653526692886,
+    "peak_speed": 0.7179029802458814,
+    "asked_speed": 0.6597344572538565,
+    "commands_hz": 19.599999999999998
+   },
+   {
+    "joint": "elbow",
+    "hz": 1.0,
+    "amplitude": 0.15,
+    "gain": 0.9454437214479898,
+    "lag_s": 0.14892277482949293,
+    "phase_deg": 53.61219893861745,
+    "offset_mrad": 6.60672314374966,
+    "distortion": 0.03990118797051822,
+    "rms_error_mrad": 91.50703077859588,
+    "peak_speed": 0.9836493506493476,
+    "asked_speed": 0.9424777960769379,
+    "commands_hz": 19.6
+   },
+   {
+    "joint": "elbow",
+    "hz": 1.5,
+    "amplitude": 0.15,
+    "gain": 0.8157368256916679,
+    "lag_s": 0.3130636376727503,
+    "phase_deg": 169.0543643432852,
+    "offset_mrad": 5.80362929891276,
+    "distortion": 0.22099310138585246,
+    "rms_error_mrad": 192.35093399006237,
+    "peak_speed": 1.2700000000000014,
+    "asked_speed": 1.413716694115407,
+    "commands_hz": 21.0
+   },
+   {
+    "joint": "elbow",
+    "hz": 2.0,
+    "amplitude": 0.15,
+    "gain": 0.4151678326517052,
+    "lag_s": 0.29625368395986906,
+    "phase_deg": 213.30265245110573,
+    "offset_mrad": -6.172098027581008,
+    "distortion": 0.1654255908625403,
+    "rms_error_mrad": 147.14457860867333,
+    "peak_speed": 1.153420368185337,
+    "asked_speed": 1.8849555921538759,
+    "commands_hz": 20.25
+   },
+   {
+    "joint": "elbow",
+    "hz": 3.0,
+    "amplitude": 0.15,
+    "gain": 0.17122756206475365,
+    "lag_s": 0.23750173896947427,
+    "phase_deg": 256.5018780870322,
+    "offset_mrad": -4.267162018374959,
+    "distortion": 0.23800249655795602,
+    "rms_error_mrad": 114.90302433479312,
+    "peak_speed": 0.6763440860215049,
+    "asked_speed": 2.827433388230814,
+    "commands_hz": 21.25
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.2,
+    "amplitude": 0.4,
+    "gain": 0.9963964959701174,
+    "lag_s": 0.13526104190176838,
+    "phase_deg": 9.738795016927323,
+    "offset_mrad": 6.091595137781125,
+    "distortion": 0.0115933355633079,
+    "rms_error_mrad": 47.217813794001295,
+    "peak_speed": 0.6549372748445741,
+    "asked_speed": 0.5026548245743669,
+    "commands_hz": 18.92
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.4,
+    "amplitude": 0.4,
+    "gain": 0.9869108982871896,
+    "lag_s": 0.15534748734421022,
+    "phase_deg": 22.370038177566272,
+    "offset_mrad": 6.5418364750604585,
+    "distortion": 0.021978173524252607,
+    "rms_error_mrad": 108.41922713603584,
+    "peak_speed": 1.099792207792202,
+    "asked_speed": 1.0053096491487339,
+    "commands_hz": 19.44
+   },
+   {
+    "joint": "elbow",
+    "hz": 0.7,
+    "amplitude": 0.4,
+    "gain": 0.960077184445542,
+    "lag_s": 0.19049696792401727,
+    "phase_deg": 48.00523591685235,
+    "offset_mrad": 8.073799684753746,
+    "distortion": 0.03028328783567842,
+    "rms_error_mrad": 224.10249826898408,
+    "peak_speed": 1.772433689242213,
+    "asked_speed": 1.7592918860102842,
+    "commands_hz": 20.58
+   },
+   {
+    "joint": "elbow",
+    "hz": 1.0,
+    "amplitude": 0.4,
+    "gain": 0.6970548389089954,
+    "lag_s": 0.4719272548834155,
+    "phase_deg": 169.89381175802959,
+    "offset_mrad": -5.710255377128659,
+    "distortion": 0.18911724606682953,
+    "rms_error_mrad": 486.5985077276001,
+    "peak_speed": 2.2705408104400284,
+    "asked_speed": 2.5132741228718345,
+    "commands_hz": 20.0
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.2,
+    "amplitude": 0.15,
+    "gain": 0.9904731649944081,
+    "lag_s": 0.11881279434830935,
+    "phase_deg": 8.554521193078273,
+    "offset_mrad": 0.6852635648503247,
+    "distortion": 0.021217866931174015,
+    "rms_error_mrad": 15.172820336585158,
+    "peak_speed": 0.2772911497105035,
+    "asked_speed": 0.18849555921538758,
+    "commands_hz": 16.4
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.4,
+    "amplitude": 0.15,
+    "gain": 0.9926028717431634,
+    "lag_s": 0.12210792902600143,
+    "phase_deg": 17.583541779744206,
+    "offset_mrad": 0.511586807678932,
+    "distortion": 0.0214726059683391,
+    "rms_error_mrad": 31.42942991564012,
+    "peak_speed": 0.44369879090067066,
+    "asked_speed": 0.37699111843077515,
+    "commands_hz": 18.16
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.7,
+    "amplitude": 0.15,
+    "gain": 0.9856040980125024,
+    "lag_s": 0.13460323368437838,
+    "phase_deg": 33.92001488846335,
+    "offset_mrad": 0.2889201126924368,
+    "distortion": 0.028995244146925697,
+    "rms_error_mrad": 60.473503936200665,
+    "peak_speed": 0.7110700646870871,
+    "asked_speed": 0.6597344572538565,
+    "commands_hz": 18.9
+   },
+   {
+    "joint": "gripper",
+    "hz": 1.0,
+    "amplitude": 0.15,
+    "gain": 0.9465257419408513,
+    "lag_s": 0.14871800121975007,
+    "phase_deg": 53.538480439110025,
+    "offset_mrad": 1.7261000825806727,
+    "distortion": 0.039550378137349004,
+    "rms_error_mrad": 92.0697932486337,
+    "peak_speed": 0.9711496225120175,
+    "asked_speed": 0.9424777960769379,
+    "commands_hz": 18.4
+   },
+   {
+    "joint": "gripper",
+    "hz": 1.5,
+    "amplitude": 0.15,
+    "gain": 0.8016910665700492,
+    "lag_s": 0.3152751440927143,
+    "phase_deg": 170.2485778100657,
+    "offset_mrad": -2.149098126748017,
+    "distortion": 0.2562078635180916,
+    "rms_error_mrad": 192.27798199481916,
+    "peak_speed": 1.2918425125921411,
+    "asked_speed": 1.413716694115407,
+    "commands_hz": 20.25
+   },
+   {
+    "joint": "gripper",
+    "hz": 2.0,
+    "amplitude": 0.15,
+    "gain": 0.4346164202466006,
+    "lag_s": 0.2997025102520673,
+    "phase_deg": 215.78580738148844,
+    "offset_mrad": -7.57744323454379,
+    "distortion": 0.20387383059238878,
+    "rms_error_mrad": 148.08058298211094,
+    "peak_speed": 1.0472597977644984,
+    "asked_speed": 1.8849555921538759,
+    "commands_hz": 19.75
+   },
+   {
+    "joint": "gripper",
+    "hz": 3.0,
+    "amplitude": 0.15,
+    "gain": 0.17036341387776024,
+    "lag_s": 0.238070628863144,
+    "phase_deg": 257.11627917219556,
+    "offset_mrad": -3.7705703551916825,
+    "distortion": 0.47091333878299907,
+    "rms_error_mrad": 121.9661392217802,
+    "peak_speed": 0.9418830202055961,
+    "asked_speed": 2.827433388230814,
+    "commands_hz": 19.75
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.2,
+    "amplitude": 0.4,
+    "gain": 0.9972283223054553,
+    "lag_s": 0.12871953659368204,
+    "phase_deg": 9.267806634745108,
+    "offset_mrad": 0.7419293178099196,
+    "distortion": 0.010362704446992317,
+    "rms_error_mrad": 44.54876370574073,
+    "peak_speed": 0.6137960148598447,
+    "asked_speed": 0.5026548245743669,
+    "commands_hz": 17.8
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.4,
+    "amplitude": 0.4,
+    "gain": 0.9903400375837392,
+    "lag_s": 0.15086848880408635,
+    "phase_deg": 21.725062387788434,
+    "offset_mrad": 0.6701768675956288,
+    "distortion": 0.02091479117865982,
+    "rms_error_mrad": 104.34075550847355,
+    "peak_speed": 1.1047234562128132,
+    "asked_speed": 1.0053096491487339,
+    "commands_hz": 18.64
+   },
+   {
+    "joint": "gripper",
+    "hz": 0.7,
+    "amplitude": 0.4,
+    "gain": 0.9620654555819715,
+    "lag_s": 0.18933788313231437,
+    "phase_deg": 47.71314654934322,
+    "offset_mrad": 1.021777371336574,
+    "distortion": 0.029991209764499177,
+    "rms_error_mrad": 224.47598001618204,
+    "peak_speed": 1.7198131868132025,
+    "asked_speed": 1.7592918860102842,
+    "commands_hz": 19.599999999999998
+   },
+   {
+    "joint": "gripper",
+    "hz": 1.0,
+    "amplitude": 0.4,
+    "gain": 0.6877756563040067,
+    "lag_s": 0.46877954065830385,
+    "phase_deg": 168.76063463698938,
+    "offset_mrad": -0.8306353404434752,
+    "distortion": 0.2255469490531449,
+    "rms_error_mrad": 473.06282360867493,
+    "peak_speed": 2.2314655123613596,
+    "asked_speed": 2.5132741228718345,
+    "commands_hz": 19.6
+   }
+  ],
+  "commands_hz": 19.412499999999998,
+  "lag_low_s": {
+   "base": 0.13527009212038696,
+   "shoulder": 0.12200346531661228,
+   "elbow": 0.13581954018671955,
+   "gripper": 0.12517465235289638
+  },
+  "speed_cap": {
+   "base": 2.284680851063833,
+   "shoulder": 2.4531692963924905,
+   "elbow": 2.2705408104400284,
+   "gripper": 2.2314655123613596
+  }
+ },
+ "stream": [
+  {
+   "label": "web app (25 Hz, 1500/60)",
+   "commands_hz": 20.375,
+   "rms_mrad": 92.5717416184928,
+   "lag_s": 0.1550000000000003,
+   "rms_at_lag_mrad": 7.180491024610645,
+   "speed_ripple": 0.05420112014551401
+  },
+  {
+   "label": "5 Hz",
+   "commands_hz": 5.0,
+   "rms_mrad": 174.05798500453483,
+   "lag_s": 0.29500000000000043,
+   "rms_at_lag_mrad": 14.227313589779127,
+   "speed_ripple": 0.23146336847902396
+  },
+  {
+   "label": "10 Hz",
+   "commands_hz": 8.625,
+   "rms_mrad": 129.47558582706014,
+   "lag_s": 0.21500000000000036,
+   "rms_at_lag_mrad": 8.273196010810118,
+   "speed_ripple": 0.10436299908869319
+  },
+  {
+   "label": "as fast as possible",
+   "commands_hz": 20.25,
+   "rms_mrad": 92.66933368588082,
+   "lag_s": 0.1550000000000003,
+   "rms_at_lag_mrad": 8.16974067399759,
+   "speed_ripple": 0.06558063004580898
+  },
+  {
+   "label": "acc 0",
+   "commands_hz": 20.125,
+   "rms_mrad": 93.10762161104813,
+   "lag_s": 0.1550000000000003,
+   "rms_at_lag_mrad": 7.962429992229583,
+   "speed_ripple": 0.06443632056769084
+  },
+  {
+   "label": "acc 10",
+   "commands_hz": 20.25,
+   "rms_mrad": 314.9901689473357,
+   "lag_s": 0.5000000000000007,
+   "rms_at_lag_mrad": 127.43723506144589,
+   "speed_ripple": 0.38283423359017565
+  },
+  {
+   "label": "acc 254",
+   "commands_hz": 20.125,
+   "rms_mrad": 92.51697772194723,
+   "lag_s": 0.1550000000000003,
+   "rms_at_lag_mrad": 7.907729094119693,
+   "speed_ripple": 0.061542661841131364
+  },
+  {
+   "label": "speed 880 (planned moves)",
+   "commands_hz": 20.375,
+   "rms_mrad": 91.79391943436096,
+   "lag_s": 0.1500000000000003,
+   "rms_at_lag_mrad": 7.745778264703657,
+   "speed_ripple": 0.06203527080126157
+  },
+  {
+   "label": "speed 300, acc 10 (catching up)",
+   "commands_hz": 20.0,
+   "rms_mrad": 261.64893025462544,
+   "lag_s": 0.5000000000000007,
+   "rms_at_lag_mrad": 94.54407717993742,
+   "speed_ripple": 0.3009790951358561
+  },
+  {
+   "label": "speed 4000",
+   "commands_hz": 19.75,
+   "rms_mrad": 93.6070004263226,
+   "lag_s": 0.1550000000000003,
+   "rms_at_lag_mrad": 7.745914711903715,
+   "speed_ripple": 0.06154264875616066
+  }
+ ],
+ "limits": [
+  {
+   "hz": 1.5,
+   "speed": 1500,
+   "acc": 60,
+   "gain": 0.8089828363003393,
+   "lag_s": 0.3080863241788772,
+   "distortion": 0.2718505627953282,
+   "peak_speed": 1.3294803499486754,
+   "rms_error_mrad": 191.19490071344356
+  },
+  {
+   "hz": 1.5,
+   "speed": 1500,
+   "acc": 150,
+   "gain": 0.8119907730927118,
+   "lag_s": 0.3064885508833797,
+   "distortion": 0.2484010691674431,
+   "peak_speed": 1.7244912271439417,
+   "rms_error_mrad": 193.8056542997944
+  },
+  {
+   "hz": 1.5,
+   "speed": 1500,
+   "acc": 254,
+   "gain": 0.8004443420397128,
+   "lag_s": 0.3093326217069471,
+   "distortion": 0.2377473378128775,
+   "peak_speed": 1.4663606286186923,
+   "rms_error_mrad": 192.1207308408975
+  },
+  {
+   "hz": 1.5,
+   "speed": 1500,
+   "acc": 0,
+   "gain": 0.8060417025073152,
+   "lag_s": 0.30668168049801414,
+   "distortion": 0.25399363934725844,
+   "peak_speed": 1.465287303822681,
+   "rms_error_mrad": 193.93510191538192
+  },
+  {
+   "hz": 1.5,
+   "speed": 4000,
+   "acc": 254,
+   "gain": 0.8050623635742581,
+   "lag_s": 0.31330954611344086,
+   "distortion": 0.20988182782973508,
+   "peak_speed": 1.2728723404255338,
+   "rms_error_mrad": 193.06594289122464
+  },
+  {
+   "hz": 1.5,
+   "speed": 4000,
+   "acc": 0,
+   "gain": 0.7893290247274058,
+   "lag_s": 0.31081254987966667,
+   "distortion": 0.2389586945478384,
+   "peak_speed": 1.4526461065816,
+   "rms_error_mrad": 191.69623975607792
+  },
+  {
+   "hz": 2.0,
+   "speed": 1500,
+   "acc": 60,
+   "gain": 0.4215393346864515,
+   "lag_s": 0.3050385797362369,
+   "distortion": 0.1947490747837774,
+   "peak_speed": 1.2403191489361691,
+   "rms_error_mrad": 144.72702894835913
+  },
+  {
+   "hz": 2.0,
+   "speed": 1500,
+   "acc": 150,
+   "gain": 0.4337696094552605,
+   "lag_s": 0.295852866021555,
+   "distortion": 0.29558738975880455,
+   "peak_speed": 1.2476185897082979,
+   "rms_error_mrad": 149.84347326277532
+  },
+  {
+   "hz": 2.0,
+   "speed": 1500,
+   "acc": 254,
+   "gain": 0.4167335194439654,
+   "lag_s": 0.28981342398206933,
+   "distortion": 0.2884042350308876,
+   "peak_speed": 1.2075531914893618,
+   "rms_error_mrad": 148.33497902164328
+  },
+  {
+   "hz": 2.0,
+   "speed": 1500,
+   "acc": 0,
+   "gain": 0.43615372827985055,
+   "lag_s": 0.2892441459922578,
+   "distortion": 0.31682419054714095,
+   "peak_speed": 1.1642855149139193,
+   "rms_error_mrad": 152.67938151823077
+  },
+  {
+   "hz": 2.0,
+   "speed": 4000,
+   "acc": 254,
+   "gain": 0.4073263972745594,
+   "lag_s": 0.29394485438533796,
+   "distortion": 0.28711475668921804,
+   "peak_speed": 1.2205376344086025,
+   "rms_error_mrad": 148.87841745005363
+  },
+  {
+   "hz": 2.0,
+   "speed": 4000,
+   "acc": 0,
+   "gain": 0.3993876609331142,
+   "lag_s": 0.29876000785254636,
+   "distortion": 0.3102492465389396,
+   "peak_speed": 1.2809337215645977,
+   "rms_error_mrad": 148.6709035040749
+  }
+ ],
+ "hold": {
+  "rows": [
+   {
+    "shoulder": -0.55,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     -48.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -9.899999999999132,
+     5.050000000000554,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.4,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     -10.151898734177216,
+     29.164556962025316,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 16.87999999999995,
+    "shoulder_hz": 4.25,
+    "elbow_pp_mrad": 6.13000000000008,
+    "elbow_hz": 4.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -3.612405063291413,
+     5.095886075950351,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.25000000000000006,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     31.849056603773583,
+     40.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     3.0011320754719515,
+     6.5800000000012515,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.09999999999999998,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     15.821656050955413,
+     42.98089171974522,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 18.41000000000001,
+    "shoulder_hz": 4.25,
+    "elbow_pp_mrad": 1.5399999999999858,
+    "elbow_hz": 4.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     1.5044585987260828,
+     7.139108280254547,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": 0.04999999999999993,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     46.77922077922078,
+     40.38961038961039,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 4.867750000000001,
+    "shoulder_hz": 5.25,
+    "elbow_pp_mrad": 1.5399999999999858,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000006,
+     6.589935064935062,
+     6.670000000001508,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": 0.19999999999999996,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     0.0,
+     48.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -2.119999999999428,
+     8.119999999997574,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": 0.3500000000000001,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     24.0,
+     48.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000006,
+     1.2800000000005585,
+     8.119999999997685,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": 0.5,
+    "elbow": 0.9,
+    "load": [
+     32.0,
+     24.0,
+     48.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     1.6099999999995562,
+     8.119999999997574,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.55,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     -40.0,
+     0.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -8.369999999997768,
+     1.5299999999955904,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.4,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     -1.0980392156862746,
+     11.477124183006536,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 19.93999999999996,
+    "shoulder_hz": 5.0,
+    "elbow_pp_mrad": 4.5999999999999375,
+    "elbow_hz": 5.0,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000006,
+     -2.0939869281048074,
+     2.220653594768418,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": -0.25000000000000006,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     36.254777070063696,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 11.045999999999966,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     3.984840764331532,
+     4.600000000001492,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.09999999999999998,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     24.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000006,
+     1.8300000000002203,
+     4.600000000001492,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": 0.04999999999999993,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     48.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.24844720496894407,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.24844720496894407,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.24844720496894407,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.24844720496894407,
+    "error_mrad": [
+     -3.070000000000006,
+     6.760000000000009,
+     4.600000000001492,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": 0.19999999999999996,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     0.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -0.5799999999999972,
+     4.600000000001492,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": 0.3500000000000001,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     24.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.24844720496894407,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.24844720496894407,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.24844720496894407,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.24844720496894407,
+    "error_mrad": [
+     -3.0700000000000065,
+     1.280000000000725,
+     4.600000000001492,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": 0.5,
+    "elbow": 1.5708,
+    "load": [
+     32.0,
+     24.0,
+     32.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25157232704402516,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25157232704402516,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25157232704402516,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25157232704402516,
+    "error_mrad": [
+     -3.070000000000006,
+     1.6099999999995562,
+     4.600000000001492,
+     3.070000000000006
+    ]
+   },
+   {
+    "shoulder": -0.55,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     -24.0,
+     0.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000065,
+     -5.300000000001415,
+     -0.6000000000039307,
+     3.0700000000000065
+    ]
+   },
+   {
+    "shoulder": -0.4,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     5.205479452054795,
+     23.80821917808219,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 19.93999999999996,
+    "shoulder_hz": 5.75,
+    "elbow_pp_mrad": 3.069999999999684,
+    "elbow_hz": 5.75,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000056,
+     -0.9693150684935148,
+     2.7104794520567133,
+     3.0700000000000056
+    ]
+   },
+   {
+    "shoulder": -0.25000000000000006,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     0.0,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000056,
+     -1.570000000000349,
+     2.470000000004191,
+     3.0700000000000056
+    ]
+   },
+   {
+    "shoulder": -0.09999999999999998,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     32.36879432624114,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 1.5300000000000036,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000005,
+     3.4251063829784654,
+     2.470000000003303,
+     3.070000000000005
+    ]
+   },
+   {
+    "shoulder": 0.04999999999999993,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     0.0,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000047,
+     0.6200000000001621,
+     2.4700000000024147,
+     3.0700000000000047
+    ]
+   },
+   {
+    "shoulder": 0.19999999999999996,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     0.0,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000005,
+     -2.119999999999511,
+     2.470000000003303,
+     3.070000000000005
+    ]
+   },
+   {
+    "shoulder": 0.3500000000000001,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     0.0,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.070000000000005,
+     -3.3200000000007113,
+     2.470000000002859,
+     3.070000000000005
+    ]
+   },
+   {
+    "shoulder": 0.5,
+    "elbow": 2.05,
+    "load": [
+     32.0,
+     0.0,
+     24.0,
+     -24.0
+    ],
+    "base_pp_mrad": 0.0,
+    "base_hz": 0.25,
+    "shoulder_pp_mrad": 0.0,
+    "shoulder_hz": 0.25,
+    "elbow_pp_mrad": 0.0,
+    "elbow_hz": 0.25,
+    "gripper_pp_mrad": 0.0,
+    "gripper_hz": 0.25,
+    "error_mrad": [
+     -3.0700000000000047,
+     -1.4600000000007385,
+     2.4700000000024147,
+     3.0700000000000047
+    ]
+   }
+  ],
+  "n": 24,
+  "hunting": 5,
+  "hunting_shoulder_range": [
+   -0.4,
+   -0.09999999999999998
+  ],
+  "hunting_pp_max_mrad": 19.93999999999996,
+  "hunting_hz": 4.25,
+  "other_joints_pp_max_mrad": {
+   "base": 0.0,
+   "elbow": 6.13000000000008,
+   "gripper": 0.0
+  }
+ },
+ "iksim": {
+  "n": 2000,
+  "once": {
+   "median_mm": 1.7125218664387627,
+   "p95_mm": 6.568894418633279,
+   "max_mm": 483.7015739931246,
+   "over_1mm": 0.8005,
+   "over_10mm": 0.0365
+  },
+  "four": {
+   "median_mm": 0.008801045831728176,
+   "p95_mm": 0.009845911655563849,
+   "max_mm": 13.6684518761694,
+   "over_1mm": 0.017,
+   "over_10mm": 0.001
+  },
+  "box": {
+   "median_mm": 121.92184554895096,
+   "p95_mm": 295.13527802232505,
+   "max_mm": 395.9446701352248,
+   "over_1mm": 0.82,
+   "over_10mm": 0.8,
+   "n": 1000,
+   "within_5mm": 0.19
+  },
+  "solve_ms": 0.3766999579966068
+ },
+ "ik": {
+  "n": 24,
+  "ik_median_mm": 1.5000618526030727,
+  "ik_max_mm": 155.55170310325838,
+  "reached_mean_mm": 10.350823419404772,
+  "reached_median_mm": 3.7614303348043037,
+  "reached_max_mm": 154.6029948336263,
+  "servo_mean_mm": 2.7689376967488677
+ },
+ "firmware_model": {
+  "n": 216,
+  "offset_mm": [
+   10.22233704819858,
+   -0.05365125613441598,
+   121.20391459090972
+  ],
+  "residual_mean_mm": 0.5612772855885679,
+  "residual_max_mm": 2.4308731851509027
+ },
+ "animations": [
+  {
+   "name": "nod",
+   "kind": "gesture",
+   "designed_s": 1.58,
+   "played_s": 3.9764999999999997,
+   "arm_rms_mrad": 40.52823281447257,
+   "tcp_rms_mm": 22.997543350758413,
+   "tcp_max_mm": 88.45317173726686,
+   "lag_s": 0.042500000000000204,
+   "tcp_rms_at_lag_mm": 13.930696911396526,
+   "reach": 0.9631779235408173,
+   "speed_ripple": 0.18856321414575175,
+   "peak_speed": 1.578737078272697,
+   "end_error_mm": 3.5301869138157764,
+   "commands_hz": 16.524066109421415,
+   "travel_mm": 207.81347512302253,
+   "relative": 0.11062329352660336,
+   "repeat_mm": 8.28157350109623,
+   "score": 2.7,
+   "joint_rms_mrad": [
+    1.5299999999999996,
+    16.6680687379668,
+    68.15651769173888,
+    7.829769788488104
+   ],
+   "joint_max_mrad": [
+    1.5299999999999998,
+    88.69333333333336,
+    201.01000000000013,
+    18.420000000000158
+   ]
+  },
+  {
+   "name": "nod_fast_big",
+   "kind": "gesture",
+   "designed_s": 1.0270000000000001,
+   "played_s": 4.086,
+   "arm_rms_mrad": 37.0156057188165,
+   "tcp_rms_mm": 20.475540081194406,
+   "tcp_max_mm": 70.60036281130418,
+   "lag_s": 0.0350000000000002,
+   "tcp_rms_at_lag_mm": 13.862855004791118,
+   "reach": 0.9819788894447223,
+   "speed_ripple": 0.17168661108400457,
+   "peak_speed": 1.6257642303228192,
+   "end_error_mm": 2.9170878593826113,
+   "commands_hz": 19.090126509613583,
+   "travel_mm": 253.87941805766536,
+   "relative": 0.0806538792335559,
+   "repeat_mm": 5.072360562389646,
+   "score": 3.5,
+   "joint_rms_mrad": [
+    1.5299999999999994,
+    14.846778825596086,
+    62.3451850415247,
+    8.954214816421139
+   ],
+   "joint_max_mrad": [
+    1.5299999999999998,
+    66.76499999999999,
+    183.92500000000013,
+    16.991702127659604
+   ]
+  },
+  {
+   "name": "wave",
+   "kind": "gesture",
+   "designed_s": 2.6,
+   "played_s": 4.539,
+   "arm_rms_mrad": 36.49173488222783,
+   "tcp_rms_mm": 17.5322063092648,
+   "tcp_max_mm": 45.5715808636332,
+   "lag_s": 0.05250000000000021,
+   "tcp_rms_at_lag_mm": 10.456131157166965,
+   "reach": 0.9417690900812192,
+   "speed_ripple": 0.12784925890590385,
+   "peak_speed": 1.5689730060565978,
+   "end_error_mm": 3.013639267661671,
+   "commands_hz": 19.608292350761854,
+   "travel_mm": 276.4436162554491,
+   "relative": 0.06344260119210401,
+   "repeat_mm": 2.9230638235150432,
+   "score": 2.7,
+   "joint_rms_mrad": [
+    62.232899180570726,
+    4.701097277080905,
+    9.978529223146083,
+    19.167826106282252
+   ],
+   "joint_max_mrad": [
+    166.08999999999963,
+    7.67,
+    44.8050806451612,
+    69.06848623853212
+   ]
+  },
+  {
+   "name": "bow",
+   "kind": "gesture",
+   "designed_s": 2.5,
+   "played_s": 2.523,
+   "arm_rms_mrad": 12.25852668769529,
+   "tcp_rms_mm": 9.00369272285191,
+   "tcp_max_mm": 36.08048960221075,
+   "lag_s": 0.0025000000000001688,
+   "tcp_rms_at_lag_mm": 8.805941361914549,
+   "reach": 0.9871866865232074,
+   "speed_ripple": 0.10734292579827909,
+   "peak_speed": 1.026219231840281,
+   "end_error_mm": 3.586273147980866,
+   "commands_hz": 18.03489611520918,
+   "travel_mm": 252.45418714228967,
+   "relative": 0.03565501160505277,
+   "repeat_mm": 5.703167993928367,
+   "score": 6.2,
+   "joint_rms_mrad": [
+    7.669999999999999,
+    14.025064649497343,
+    13.942161908973759,
+    3.07
+   ],
+   "joint_max_mrad": [
+    7.67,
+    56.2173076923077,
+    55.35461538461539,
+    3.07
+   ]
+  },
+  {
+   "name": "shake",
+   "kind": "gesture",
+   "designed_s": 1.8000000000000003,
+   "played_s": 4.1875,
+   "arm_rms_mrad": 26.449404745851503,
+   "tcp_rms_mm": 15.35346914935254,
+   "tcp_max_mm": 45.4315275501375,
+   "lag_s": 0.0350000000000002,
+   "tcp_rms_at_lag_mm": 9.2882879500938,
+   "reach": 0.9285629936316798,
+   "speed_ripple": 0.0989793034430375,
+   "peak_speed": 1.5874476368842436,
+   "end_error_mm": 2.5234789378076856,
+   "commands_hz": 19.22458596322902,
+   "travel_mm": 167.99287994898356,
+   "relative": 0.0913958635392839,
+   "repeat_mm": 4.081995582457852,
+   "score": 3.3,
+   "joint_rms_mrad": [
+    38.94703908138882,
+    9.945498593676447,
+    21.968146354972685,
+    3.0700000000000003
+   ],
+   "joint_max_mrad": [
+    82.785,
+    45.30936507936507,
+    114.68311827957001,
+    3.07
+   ]
+  },
+  {
+   "name": "circle",
+   "kind": "gesture",
+   "designed_s": 3.18,
+   "played_s": 5.2265,
+   "arm_rms_mrad": 17.30700874706765,
+   "tcp_rms_mm": 9.453600056354272,
+   "tcp_max_mm": 33.45534593287332,
+   "lag_s": 0.017500000000000182,
+   "tcp_rms_at_lag_mm": 7.443280813322541,
+   "reach": 0.983411278851386,
+   "speed_ripple": 0.07791188409844274,
+   "peak_speed": 1.250617095962302,
+   "end_error_mm": 4.343976119373263,
+   "commands_hz": 19.42043939712653,
+   "travel_mm": 203.42025884845077,
+   "relative": 0.04647407440866848,
+   "repeat_mm": 3.3769676100389905,
+   "score": 5.6,
+   "joint_rms_mrad": [
+    26.977498363307802,
+    5.5134759816830385,
+    11.809678067827262,
+    3.0700000000000003
+   ],
+   "joint_max_mrad": [
+    106.81772727272725,
+    7.67,
+    35.42212765957453,
+    3.07
+   ]
+  },
+  {
+   "name": "figure_eight",
+   "kind": "gesture",
+   "designed_s": 3.8999999999999986,
+   "played_s": 6.1795,
+   "arm_rms_mrad": 16.35024553958374,
+   "tcp_rms_mm": 8.868746687681405,
+   "tcp_max_mm": 39.5658104619333,
+   "lag_s": 0.017500000000000182,
+   "tcp_rms_at_lag_mm": 6.757590249189293,
+   "reach": 0.9694034860755635,
+   "speed_ripple": 0.09972141590517927,
+   "peak_speed": 1.220918202371103,
+   "end_error_mm": 3.517923311205311,
+   "commands_hz": 19.33826084233022,
+   "travel_mm": 206.29705620706795,
+   "relative": 0.04298913021442928,
+   "repeat_mm": 4.383244291352573,
+   "score": 5.6,
+   "joint_rms_mrad": [
+    24.471412589528065,
+    5.163437005944366,
+    13.276591394777443,
+    3.0699999999999994
+   ],
+   "joint_max_mrad": [
+    103.27,
+    6.14,
+    75.72500000000004,
+    3.07
+   ]
+  },
+  {
+   "name": "dance",
+   "kind": "gesture",
+   "designed_s": 4.0,
+   "played_s": 5.9375,
+   "arm_rms_mrad": 12.428260399126327,
+   "tcp_rms_mm": 7.32542649162729,
+   "tcp_max_mm": 22.355831162648762,
+   "lag_s": 0.007500000000000173,
+   "tcp_rms_at_lag_mm": 6.509182293196469,
+   "reach": 0.9729863606731911,
+   "speed_ripple": 0.07320199243660325,
+   "peak_speed": 1.3302871805582193,
+   "end_error_mm": 2.4116776328828813,
+   "commands_hz": 19.284122110874936,
+   "travel_mm": 179.2812956928699,
+   "relative": 0.04085915196367026,
+   "repeat_mm": 3.1658488228352395,
+   "score": 6.3,
+   "joint_rms_mrad": [
+    18.28680071130698,
+    7.1320088519821425,
+    8.835037635175714,
+    29.892809931613797
+   ],
+   "joint_max_mrad": [
+    61.94319148936162,
+    27.27659574468085,
+    23.818145161290218,
+    102.1200000000002
+   ]
+  },
+  {
+   "name": "celebrate_big",
+   "kind": "gesture",
+   "designed_s": 2.5999999999999996,
+   "played_s": 9.648,
+   "arm_rms_mrad": 18.18762427539484,
+   "tcp_rms_mm": 6.24730470105433,
+   "tcp_max_mm": 33.96949978207571,
+   "lag_s": 0.017500000000000182,
+   "tcp_rms_at_lag_mm": 7.131794388394255,
+   "reach": 0.9664758667273626,
+   "speed_ripple": 0.115280081854223,
+   "peak_speed": 1.5912366373836992,
+   "end_error_mm": 3.200991344949938,
+   "commands_hz": 19.01962789674341,
+   "travel_mm": 385.8205868199424,
+   "relative": 0.01619210044875658,
+   "repeat_mm": 4.0008522575606635,
+   "score": 6.1,
+   "joint_rms_mrad": [
+    24.537185891696765,
+    7.951500116737968,
+    18.084985169299998,
+    25.478937668174204
+   ],
+   "joint_max_mrad": [
+    66.45041284403675,
+    22.89574468085112,
+    117.14758064516117,
+    60.17500000000142
+   ]
+  },
+  {
+   "name": "stir_slow",
+   "kind": "gesture",
+   "designed_s": 7.520000000000004,
+   "played_s": 7.531499999999999,
+   "arm_rms_mrad": 9.001913068373703,
+   "tcp_rms_mm": 5.7220491703808385,
+   "tcp_max_mm": 15.236822221815544,
+   "lag_s": -0.00749999999999984,
+   "tcp_rms_at_lag_mm": 5.502237564702938,
+   "reach": 0.954681699003407,
+   "speed_ripple": 0.06634727248397984,
+   "peak_speed": 0.7708083942535009,
+   "end_error_mm": 6.1857939531596955,
+   "commands_hz": 19.650817689432802,
+   "travel_mm": 194.82235447997172,
+   "relative": 0.02936643658237472,
+   "repeat_mm": 3.889934607161695,
+   "score": 5.8,
+   "joint_rms_mrad": [
+    6.2064569670854866,
+    9.038930794496611,
+    11.034557714414767,
+    3.1109405171241424
+   ],
+   "joint_max_mrad": [
+    23.66857142857151,
+    26.904807692307685,
+    27.378717948717934,
+    6.14
+   ]
+  },
+  {
+   "name": "circle_front",
+   "kind": "shape",
+   "designed_s": 6.6,
+   "played_s": 7.1795,
+   "arm_rms_mrad": 4.981941525175168,
+   "tcp_rms_mm": 2.8224396861045262,
+   "tcp_max_mm": 6.09539993208171,
+   "lag_s": -0.009999999999999842,
+   "tcp_rms_at_lag_mm": 2.7489887893671363,
+   "reach": 0.9636457782111011,
+   "speed_ripple": 0.024245392047069617,
+   "peak_speed": 0.2861895728260231,
+   "end_error_mm": 2.0146226979489583,
+   "commands_hz": 17.63363926011583,
+   "travel_mm": 69.6910297196824,
+   "relative": 0.0404966661126616,
+   "path_error_picture_mm": 1.3335160988799846,
+   "path_error_mm": 1.5800505835138905,
+   "path_error_max_mm": 3.980798562000794,
+   "path_size_mm": 120.0,
+   "repeat_mm": 1.9856716291346108,
+   "score": 7.4,
+   "joint_rms_mrad": [
+    3.957605838854497,
+    2.4474767837438325,
+    7.261474963643348,
+    3.0699999999999994
+   ],
+   "joint_max_mrad": [
+    9.424999999999988,
+    6.253989361702135,
+    17.56243589743578,
+    3.07
+   ]
+  },
+  {
+   "name": "circle_flat",
+   "kind": "shape",
+   "designed_s": 6.6,
+   "played_s": 6.633,
+   "arm_rms_mrad": 5.949563005651319,
+   "tcp_rms_mm": 3.200122618771239,
+   "tcp_max_mm": 6.3978075382124,
+   "lag_s": -0.014999999999999847,
+   "tcp_rms_at_lag_mm": 3.049343894529938,
+   "reach": 0.960288191388408,
+   "speed_ripple": 0.02927173307003493,
+   "peak_speed": 0.3106937622716244,
+   "end_error_mm": 2.8828327691025057,
+   "commands_hz": 19.29729837231833,
+   "travel_mm": 69.87838331262867,
+   "relative": 0.045795997667968116,
+   "path_error_picture_mm": 0.8857859730391513,
+   "path_error_mm": 2.8977535252941653,
+   "path_error_max_mm": 5.989411384519789,
+   "path_size_mm": 120.0,
+   "repeat_mm": 1.3184231123393866,
+   "score": 7.2,
+   "joint_rms_mrad": [
+    3.983326282904594,
+    5.974846553490848,
+    7.387202482457338,
+    3.07
+   ],
+   "joint_max_mrad": [
+    11.734999999999996,
+    13.954255319149066,
+    16.042307692307524,
+    3.07
+   ]
+  },
+  {
+   "name": "circle_side",
+   "kind": "shape",
+   "designed_s": 6.6,
+   "played_s": 6.617,
+   "arm_rms_mrad": 6.948841082031487,
+   "tcp_rms_mm": 4.0686342012103225,
+   "tcp_max_mm": 11.837704980177806,
+   "lag_s": -0.022499999999999853,
+   "tcp_rms_at_lag_mm": 3.812854884406594,
+   "reach": 0.9861214290921634,
+   "speed_ripple": 0.054128969581088295,
+   "peak_speed": 0.39921242240279886,
+   "end_error_mm": 3.7219672275256617,
+   "commands_hz": 19.494424467661364,
+   "travel_mm": 70.48390188624464,
+   "relative": 0.05772359335155368,
+   "path_error_picture_mm": 1.0778411727701667,
+   "path_error_mm": 2.3199750275597846,
+   "path_error_max_mm": 7.388855055638542,
+   "path_size_mm": 99.99999999999997,
+   "repeat_mm": 3.7495809411720447,
+   "score": 6.7,
+   "joint_rms_mrad": [
+    1.5299999999999998,
+    7.215466414633513,
+    9.495077015863913,
+    3.0699999999999994
+   ],
+   "joint_max_mrad": [
+    1.5299999999999998,
+    20.430000000000003,
+    26.074999999999847,
+    3.07
+   ]
+  },
+  {
+   "name": "figure_eight_front",
+   "kind": "shape",
+   "designed_s": 8.099999999999998,
+   "played_s": 8.117,
+   "arm_rms_mrad": 5.819448477534612,
+   "tcp_rms_mm": 2.735121986483171,
+   "tcp_max_mm": 6.666873551833505,
+   "lag_s": -0.009999999999999842,
+   "tcp_rms_at_lag_mm": 2.7408549461279446,
+   "reach": 0.9561440336958806,
+   "speed_ripple": 0.025466095584634245,
+   "peak_speed": 0.35616874453998726,
+   "end_error_mm": 3.2952103500990866,
+   "commands_hz": 19.3422905717715,
+   "travel_mm": 82.93347839079911,
+   "relative": 0.032979335165362694,
+   "path_error_picture_mm": 0.6509847517150342,
+   "path_error_mm": 1.9896985643131186,
+   "path_error_max_mm": 3.8536414253103253,
+   "path_size_mm": 160.0,
+   "repeat_mm": 1.4024275250270357,
+   "score": 7.2,
+   "joint_rms_mrad": [
+    4.0500014482043465,
+    3.2291552677870903,
+    8.646014871115668,
+    3.069999999999999
+   ],
+   "joint_max_mrad": [
+    10.20500000000002,
+    12.87448717948718,
+    19.689999999999763,
+    3.07
+   ]
+  },
+  {
+   "name": "spiral_front",
+   "kind": "shape",
+   "designed_s": 8.6,
+   "played_s": 8.625,
+   "arm_rms_mrad": 5.3539590584229115,
+   "tcp_rms_mm": 2.4899833886057023,
+   "tcp_max_mm": 6.796533797441688,
+   "lag_s": -0.012499999999999845,
+   "tcp_rms_at_lag_mm": 2.192125780619455,
+   "reach": 0.9572179190098189,
+   "speed_ripple": 0.02470167018314994,
+   "peak_speed": 0.4591600337963607,
+   "end_error_mm": 0.8613993671840056,
+   "commands_hz": 19.53662173661217,
+   "travel_mm": 79.11374058629383,
+   "relative": 0.031477736660139026,
+   "path_error_picture_mm": 0.865661335198846,
+   "path_error_mm": 1.5038991646061206,
+   "path_error_max_mm": 3.479447888738549,
+   "path_size_mm": 126.25000000000003,
+   "repeat_mm": 1.37968623605679,
+   "score": 7.8,
+   "joint_rms_mrad": [
+    4.506071232419709,
+    2.6351946402935837,
+    7.662978770388141,
+    3.0699999999999985
+   ],
+   "joint_max_mrad": [
+    12.919999999999803,
+    8.394112903225805,
+    20.055000000000156,
+    3.07
+   ]
+  },
+  {
+   "name": "square_front",
+   "kind": "shape",
+   "designed_s": 8.099999999999998,
+   "played_s": 8.14,
+   "arm_rms_mrad": 5.4667178128009395,
+   "tcp_rms_mm": 3.1672816223441167,
+   "tcp_max_mm": 7.255864446124561,
+   "lag_s": -0.009999999999999842,
+   "tcp_rms_at_lag_mm": 3.0904101250209695,
+   "reach": 0.9493450229545709,
+   "speed_ripple": 0.027402147776125547,
+   "peak_speed": 0.3476052363521491,
+   "end_error_mm": 3.0093669734943767,
+   "commands_hz": 19.226044226044223,
+   "travel_mm": 78.07031767014007,
+   "relative": 0.04057012812536996,
+   "path_error_picture_mm": 0.7420572783374724,
+   "path_error_mm": 1.926041696228098,
+   "path_error_max_mm": 4.344199046335973,
+   "path_size_mm": 100.0,
+   "repeat_mm": 1.6139271329336646,
+   "score": 7.0,
+   "joint_rms_mrad": [
+    5.022009124370799,
+    3.8355105216281116,
+    7.050363323861156,
+    3.0699999999999985
+   ],
+   "joint_max_mrad": [
+    11.3095512820513,
+    8.361923076923079,
+    16.947243589743756,
+    3.07
+   ]
+  },
+  {
+   "name": "triangle_front",
+   "kind": "shape",
+   "designed_s": 7.6,
+   "played_s": 7.6325,
+   "arm_rms_mrad": 5.074635494902681,
+   "tcp_rms_mm": 3.191718286131745,
+   "tcp_max_mm": 9.308683675114034,
+   "lag_s": -0.004999999999999838,
+   "tcp_rms_at_lag_mm": 3.1648558490302783,
+   "reach": 0.9590349741932181,
+   "speed_ripple": 0.030939007010777564,
+   "peak_speed": 0.33515875064003975,
+   "end_error_mm": 2.857311056449459,
+   "commands_hz": 19.259891854776413,
+   "travel_mm": 72.39280859741493,
+   "relative": 0.04410589917990676,
+   "path_error_picture_mm": 0.5433101915056022,
+   "path_error_mm": 2.0528995697155876,
+   "path_error_max_mm": 4.4000934548395865,
+   "path_size_mm": 120.0,
+   "repeat_mm": 1.5614052752108214,
+   "score": 7.3,
+   "joint_rms_mrad": [
+    3.7361233008794175,
+    4.3737930150844315,
+    6.6296269015592575,
+    3.069999999999999
+   ],
+   "joint_max_mrad": [
+    10.74,
+    14.009838709677432,
+    18.92793650793645,
+    3.07
+   ]
+  },
+  {
+   "name": "line_forward",
+   "kind": "shape",
+   "designed_s": 6.6,
+   "played_s": 6.633,
+   "arm_rms_mrad": 8.182384341846976,
+   "tcp_rms_mm": 4.49401253058815,
+   "tcp_max_mm": 9.66927793750053,
+   "lag_s": -0.012499999999999845,
+   "tcp_rms_at_lag_mm": 4.337871511736658,
+   "reach": 0.9948177943480505,
+   "speed_ripple": 0.06358728648080869,
+   "peak_speed": 0.7709009433219114,
+   "end_error_mm": 4.337634861897866,
+   "commands_hz": 18.09053335563831,
+   "travel_mm": 80.59107588377265,
+   "relative": 0.05576925659026248,
+   "path_error_picture_mm": 0.29066375345014706,
+   "path_error_mm": 3.721895658985671,
+   "path_error_max_mm": 8.858561769272207,
+   "path_size_mm": 120.0,
+   "repeat_mm": 2.717957749442395,
+   "score": 6.9,
+   "joint_rms_mrad": [
+    4.6,
+    9.661301564334343,
+    9.264247364369336,
+    2.1354214680163173
+   ],
+   "joint_max_mrad": [
+    4.6,
+    25.453617021276443,
+    24.460873015873076,
+    3.07
+   ]
+  },
+  {
+   "name": "line_up",
+   "kind": "shape",
+   "designed_s": 6.6,
+   "played_s": 6.624499999999999,
+   "arm_rms_mrad": 6.864288575347544,
+   "tcp_rms_mm": 3.609604312446981,
+   "tcp_max_mm": 8.165802049796802,
+   "lag_s": -0.012499999999999845,
+   "tcp_rms_at_lag_mm": 3.3462599832726303,
+   "reach": 0.9801333898356122,
+   "speed_ripple": 0.03175009763624506,
+   "peak_speed": 0.713387146991197,
+   "end_error_mm": 3.969778138324488,
+   "commands_hz": 18.039019445918036,
+   "travel_mm": 74.86904086406591,
+   "relative": 0.04821218841101349,
+   "path_error_picture_mm": 0.2481460948625799,
+   "path_error_mm": 1.5912476968668283,
+   "path_error_max_mm": 2.7982607450820356,
+   "path_size_mm": 140.0,
+   "repeat_mm": 1.4469675910280537,
+   "score": 7.3,
+   "joint_rms_mrad": [
+    4.6,
+    2.950260494441942,
+    10.542241520028362,
+    1.5299999999999998
+   ],
+   "joint_max_mrad": [
+    4.6,
+    8.204468085106383,
+    22.562580645161255,
+    1.5299999999999998
+   ]
+  }
+ ],
+ "animation_summary": {
+  "n": 19,
+  "score_mean": 5.9263157894736835,
+  "score_min": 2.7,
+  "score_max": 7.8,
+  "tcp_rms_mean_mm": 8.03992091332664,
+  "tcp_max_mm": 88.45317173726686,
+  "tcp_rms_at_lag_mean_mm": 6.219555971488424,
+  "arm_rms_mean_mrad": 14.771596644859134,
+  "lag_mean_s": 0.005789473684210698,
+  "lag_min_s": -0.022499999999999853,
+  "lag_max_s": 0.05250000000000021,
+  "reach_min": 0.9285629936316798,
+  "repeat_mean_mm": 3.266055591825322,
+  "joint_rms_mean_mrad": [
+   13.072338421711477,
+   7.226782425794705,
+   16.49319039027041,
+   6.940522120848418
+  ],
+  "commands_hz": 18.900789382926266,
+  "relative_mean": 0.050251702314670375,
+  "by_kind": {
+   "shape": {
+    "score": 7.199999999999999,
+    "tcp_rms_mm": 3.3087687369651064,
+    "tcp_max_mm": 11.837704980177806,
+    "relative": 0.04412564458491531,
+    "arm_rms_mrad": 6.071308819301516,
+    "stretch": 1.0131456931846232
+   },
+   "gesture": {
+    "score": 4.779999999999999,
+    "tcp_rms_mm": 12.29795787205202,
+    "tcp_max_mm": 88.45317173726686,
+    "relative": 0.05576515427144992,
+    "arm_rms_mrad": 22.601855687860997,
+    "stretch": 2.1001422779893586
+   }
+  },
+  "path_error_mean_mm": 2.1759401652314736,
+  "path_error_picture_mean_mm": 0.7375518499732205,
+  "error_per_speed_ms": 30.741508441536073,
+  "error_at_rest_mm": 3.037761122683632
+ }
+}

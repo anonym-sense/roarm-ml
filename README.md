@@ -37,6 +37,8 @@ joint vector so nothing needs translating between sim and hardware.
 | `roarm_rl/env.py` | `RoArmReachEnv`: Gymnasium reach task |
 | `roarm_rl/train.py` | PPO training and evaluation (Stable-Baselines3) |
 | `roarm_rl/main.py` | CLI entry point for the GUI |
+| `roarm_rl/benchmark.py` | Measures the real arm against what the web app commands |
+| `roarm_rl/benchmark_report.py` | Turns those logs into the figures and tables in `docs/paper` |
 | `assets/` | RoArm-M2 URDF and meshes (from Waveshare, see [NOTICE.md](NOTICE.md)) |
 
 Joint order everywhere is `[base, shoulder, elbow, gripper]` in radians. This
@@ -316,6 +318,25 @@ Every pose is kept inside `SAFE_BOUNDS` (base +/-1.2 rad, shoulder -0.6 to
 0.55, elbow 0.7 to 2.1, gripper 0 to 1.2). In the simulator every variant
 keeps the hand at least 4.5 cm above the table and never self-collides.
 
+## How accurate is the real arm?
+
+[docs/paper](docs/paper/README.md) is a measurement study of one RoArm-M2
+driven by the web app: where each joint comes to rest, how far behind a
+moving command it runs, where it stops keeping up, when the shoulder hunts,
+how good the inverse kinematics is, and how closely 19 animations were
+reproduced, with plots of the simulated picture against the measured arm.
+In short: about 3 mm at the hand at rest, a 125 ms delay that the web app
+cancels, faithful up to about 2 rad/s and 8 rad/s², slow traced shapes
+within 2.5 to 4.5 mm of the picture and quick gestures within 6 to 23 mm.
+
+```
+python -m roarm_rl.benchmark animations   # one of ten experiments; needs the arm on USB
+python -m roarm_rl.benchmark_report       # figures and tables (needs matplotlib)
+```
+
+"Measured" there means the servos' own encoders, so flex and play beyond
+the servo shaft are not included.
+
 ## Reinforcement learning
 
 `RoArmReachEnv` is a Gymnasium environment: move the hand to a random
@@ -339,8 +360,11 @@ Training runs headless with PPO and writes checkpoints to
 
 - The URDF loads and simulates with four revolute joints; joint-space control
   reaches commanded targets.
-- IK (`RoArmSim.solve_ik`) converges to sub-millimetre accuracy against the
-  `hand_tcp` frame on the targets tried so far.
+- IK (`RoArmSim.solve_ik`) reaches 0.01 mm against the `hand_tcp` frame on
+  98% of 2000 reachable targets when solved four times in a row, as the
+  hand-over code does. A single solve, as dragging the hand does, misses by
+  1.7 mm at the median and by more than 1 cm on 3.7% of targets; on the real
+  arm 1 of 24 such reaches ended 155 mm off. See the paper, section 7.
 - Tested on a physical RoArm-M2: mirroring from the GUI and gesture playback
   drive the real arm.
 - **The reach policy does not work yet.** A 1M-step PPO run with the default
@@ -354,12 +378,19 @@ Training runs headless with PPO and writes checkpoints to
   with the new distance estimate.
 - The web app was tested in the simulator from a desktop browser, including
   speech sent as a recorded file, and its mirroring was measured on a real
-  RoArm-M2 over USB (joints land within about 0.01 rad of a commanded pose).
+  RoArm-M2 over USB (joints settle 3 to 9 mrad RMS from a commanded pose,
+  14.5 mrad at worst; the shoulder can oscillate by up to 20 mrad at rest
+  when leaning back about 0.4 rad).
   It has not been tried on a physical phone or with a live microphone, and
   releasing the motors was only tested against a stand-in for the arm.
-- The chat window, gesture library and gesture inventor have been run in the
-  simulator only. The wider motion range and the library gestures have not
-  been played on the physical arm yet; try a `small` variant first.
+- Ten library gestures and nine traced shapes were played on the physical
+  arm through the web app and scored against the picture
+  ([docs/paper](docs/paper/README.md)). The other 56 motions, the chat
+  window and the gesture inventor have been run in the simulator only; try a
+  `small` variant first. On the real arm quick gestures play about twice as
+  slowly as designed, and "fast" and "normal" come out nearly the same.
+- The benchmark measures with the servo encoders only. Nothing here has
+  been checked against an external ruler or camera.
 - Voice input was tested on synthesized speech fed through the same
   segmenting and transcription code, not yet on a live microphone.
 - Not built yet: replaying a trained policy on the real arm, and motions

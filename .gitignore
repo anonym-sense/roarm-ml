@@ -16,6 +16,8 @@ runs/
 # What was said to the arm, and the HTTPS certificate
 data/
 certs/
+# ...but the benchmark logs behind docs/paper are published
+!docs/paper/data/
 
 # PyBullet profiler dumps
 timings_*.json
