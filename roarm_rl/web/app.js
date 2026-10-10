@@ -578,6 +578,7 @@ segment("seg-speed", "speed", info.speeds);
 segment("seg-size", "size", info.sizes);
 segment("seg-side", "side", ["left", "right"]);
 buildSliders();
-if (location.hash === "#learning") document.querySelector('[data-pane="learning"]').click();
-if (location.hash === "#gestures") document.querySelector('[data-pane="gestures"]').click();
+// a link such as /#gestures or /#control opens on that tab
+const startTab = document.querySelector(`.tabs button[data-pane="${location.hash.slice(1)}"]`);
+if (startTab) startTab.click();
 connect();

@@ -5,6 +5,11 @@ Simulation, control and reinforcement learning for the
 robot arm ([product page](https://www.waveshare.com/roarm-m2-s.htm),
 [wiki](https://www.waveshare.com/wiki/RoArm-M2-S)).
 
+![The web app: 3D view of the arm with the gesture cards](docs/web/gestures.png)
+
+*The web app (`python -m roarm_rl.server`): the arm in 3D on the left, every
+gesture as a card on the right. More screenshots [below](#web-app).*
+
 ![The RoArm-M2 model in the PyBullet simulator](docs/roarm_m2_sim.png)
 
 *The arm as rendered by this project's simulator, using Waveshare's
@@ -88,6 +93,15 @@ One page, laid out for a desktop or a phone:
   things to the arm and getting them back (see below).
 - **Learning**: what the arm has picked up (see below).
 - **Control**: joint sliders, and the switch that mirrors to the real arm.
+
+| | |
+| --- | --- |
+| ![Chat tab](docs/web/chat.png) **Chat**: type or speak; each reply can be rated | ![Gestures tab](docs/web/gestures.png) **Gestures**: speed, size and side, then tap a card |
+| ![Camera tab](docs/web/camera.png) **Camera**: hand-over and camera calibration | ![Learning tab](docs/web/learning.png) **Learning**: what it has picked up from use |
+| ![Control tab](docs/web/control.png) **Control**: joint sliders, Mirror and motor switches | <img src="docs/web/phone.png" alt="Phone layout" width="280"> **On a phone** |
+
+*Screenshots from the simulator with no arm attached. A link ending in a tab
+name, such as `/#gestures` or `/#control`, opens on that tab.*
 
 The real arm only moves when the server was started with `--hw serial` (the
 USB port is found automatically, or pass `--port`) or `--hw http`, **and** the

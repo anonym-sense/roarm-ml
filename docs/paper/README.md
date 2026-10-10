@@ -77,10 +77,19 @@ this resolution. Nothing was attached to the gripper.
 
 ### 2.2 The web app and the shapes of motion it produces
 
-![The web app](figures/web_ui.png)
+![The web app, Gestures tab](../web/gestures.png)
 
-*The page under test: a three.js view of the simulated arm, with chat,
-gesture cards, camera hand-over and joint sliders in the side panel.*
+*The page under test. Left: a three.js view of the simulated arm, which is
+the "picture" the real arm is compared with. Right: the Gestures tab; a
+card plays that motion at the chosen speed, size and side.*
+
+| | |
+| --- | --- |
+| ![Control tab](../web/control.png) **Control**: the joint sliders (ramp at 1.5 rad/s), the Mirror switch that sends the picture to the real arm, and the motor switch | ![Chat tab](../web/chat.png) **Chat**: typed or spoken requests become queued gestures |
+| ![Camera tab](../web/camera.png) **Camera**: hand-over moves (one quintic per move) | ![Learning tab](../web/learning.png) **Learning**: preferences and skills, not used in this study |
+
+*Each tab is a different way of producing motion; the table below gives the
+shape each one produces.*
 
 The server (`roarm_rl/server.py`) runs a headless PyBullet [3] model of the
 arm at 60 ticks per second. Each tick it computes one joint vector
